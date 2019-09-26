@@ -59,3 +59,11 @@ typings/
 
 # next.js build output
 .next
+
+#frontend related generated files and ide generated
+.DS_Store
+dist/
+.idea
+*.suo
+*.ntvs*
+*.sln
