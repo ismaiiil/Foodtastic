@@ -14,7 +14,10 @@ npm run dev
 # build for production with minification
 npm run build
 
-#for serving the build files, you need serve npm package installed globally
+#for serving in prod. mode just use
+npm run build-start
+#or
+npm run start
 ```
 
 For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
