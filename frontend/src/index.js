@@ -7,7 +7,7 @@ import { StoreProvider, createStore, action } from "easy-peasy";
 
 const store = createStore({
   user: {
-    isLogged: false,
+    isLogged: true,
     setIsLogged: action((state, bool) => {
       state.isLogged = bool;
     })
