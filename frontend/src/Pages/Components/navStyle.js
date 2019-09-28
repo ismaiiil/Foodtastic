@@ -77,5 +77,8 @@ export const useStyles = makeStyles(theme => ({
   },
   fixedHeight: {
     height: 240
+  },
+  navBtn: {
+    margin: theme.spacing(1)
   }
 }));
