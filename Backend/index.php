@@ -60,6 +60,7 @@ abstract class DBHelper {
                 $request->bindValue(':'.$key, $value);
             }
         }
+        //echo json_encode($request);
         $request->execute();
         $result = null;
         if($fetch) {
@@ -227,39 +228,56 @@ class CUSTOMER {
     public function __construct(){ }
 }
 
+class SO_HEADER{
+    public $SO_NUM;
+    public $CUST_UNAME;
+    public $SO_DATE;
+    public $SO_TOTAL;
+}
+
+class SO_LINE{
+    public $SO_NUM;
+    public $PROD_ID;
+    public $SO_LINE_NETPR;
+    public $SO_LINE_QTY;
+    public $CITY_NAME;
+}
+
 class CustomerDao extends DBHelper {
     public static $TABLE = "CUSTOMER";
 
     public static function save(CUSTOMER $customer){
-        $query = "INSERT INTO ".CustomerDao::$TABLE." (`CUST_UNAME`,`CUST_FNAME`,`CUST_LNAME`,`CUST_PWD`,`CUST_ADDR`,`CUST_CITY`,`CUST_ZIP`,`CUST_IS_ADMIN`,`CUST_IS_BLOCKED`) "
-                . "VALUES ( :CUST_UNAME, :CUST_FNAME, :CUST_LNAME, :CUST_PWD, :CUST_ADDR, :CUST_CITY, :CUST_ZIP, :CUST_IS_ADMIN, :CUST_IS_BLOCKED);";
-          $params = array(
-            'CUST_UNAME' => $customer->$CITY_NAME, 
-            'CUST_FNAME' => $customer->$CUST_FNAME, 
-            'CUST_LNAME' => $customer->$CUST_LNAME, 
-            'CUST_PWD' => $customer->$CUST_PWD, 
-            'CUST_ADDR' => $customer->$CUST_ADDR, 
-            'CUST_CITY' => $customer->$CUST_CITY, 
-            'CUST_ZIP' => $customer->$CUST_ZIP, 
-            'CUST_IS_ADMIN' => $customer->$CUST_IS_ADMINCIA, 
-            'CUST_IS_BLOCKED' => $customer->$CUST_IS_BLOCKED
+        $query = "INSERT INTO ".CustomerDao::$TABLE." (`CUST_UNAME`,`CUST_FNAME`,`CUST_LNAME`,`CUST_PWD`,`CUST_ADDR`,`CUST_CITY`,`CUST_ZIP`,`CUST_IS_ADMIN`,`CUST_IS_BLOCKED`)
+                VALUES (:CUST_UNAME, :CUST_FNAME, :CUST_LNAME, :CUST_PWD, :CUST_ADDR, :CUST_CITY, :CUST_ZIP, :CUST_IS_ADMIN, :CUST_IS_BLOCKED)
+                ON DUPLICATE KEY UPDATE CUST_FNAME = :CUST_FNAME, CUST_LNAME=:CUST_LNAME, CUST_PWD=:CUST_PWD, CUST_ADDR=:CUST_ADDR, CUST_CITY=:CUST_CITY, CUST_ZIP=:CUST_ZIP;";
+          
+        $params = array(
+            'CUST_UNAME' => $customer->CUST_UNAME, 
+            'CUST_FNAME' => $customer->CUST_FNAME, 
+            'CUST_LNAME' => $customer->CUST_LNAME, 
+            'CUST_PWD' => $customer->CUST_PWD, 
+            'CUST_ADDR' => $customer->CUST_ADDR, 
+            'CUST_CITY' => $customer->CUST_CITY, 
+            'CUST_ZIP' => $customer->CUST_ZIP, 
+            'CUST_IS_ADMIN' => $customer->CUST_IS_ADMIN, 
+            'CUST_IS_BLOCKED' => $customer->CUST_IS_BLOCKED
           );
           self::beginTransaction();
           try{
-              
               self::exec($query, $params);
               self::commit();
+              
           }
           catch (PDOException $ex) {
               self::rollBack();
               return false;
           }
-          return $user;
+          return $customer;
     }
 
     public static function getByUsername($username) {
         $query = "SELECT * FROM ".CustomerDao::$TABLE." WHERE CUST_UNAME = :CUST_UNAME";
-        return self::justOne(self::execute($query, "CUSTOMER", array('CUST_UNAME' => $userName)));
+        return self::justOne(self::execute($query, "CUSTOMER", array('CUST_UNAME' => $username)));
     }
 
     public static function checkUsernameAndPwd($username,$password){
@@ -327,11 +345,84 @@ class FoodGroupDao extends DBHelper {
     }
 }
 
+class SalesDao extends DBhelper{
+    public static $SO_HEADER_TABLE = "SO_HEADER";
+    public static $SO_LINE_TABLE = "SO_LINE";
+    public static function save_header(SO_HEADER $so_header) {
+        
+        $query = "INSERT INTO ".SalesDao::$SO_HEADER_TABLE." ( `SO_NUM` , `CUST_UNAME`, `SO_DATE`, `SO_TOTAL`)
+        VALUES (:SO_NUM, :CUST_UNAME, :SO_DATE, :SO_TOTAL)
+        ON DUPLICATE KEY UPDATE SO_TOTAL = :SO_TOTAL;";
+
+        $params = array(
+            'SO_NUM' => $so_header->CUST_UNAME, 
+            'CUST_UNAME' => $so_header->CUST_FNAME, 
+            'SO_DATE' => $so_header->CUST_LNAME, 
+            'SO_TOTAL' => $so_header->CUST_PWD
+          );
+          self::beginTransaction();
+          try{
+              self::exec($query, $params);
+              self::commit();
+              
+          }
+          catch (PDOException $ex) {
+              self::rollBack();
+              return false;
+          }
+          return $so_header;
+    }
+
+    public static function create_line(SO_LINE $so_line){
+        $query = "INSERT INTO ".SalesDao::$SO_LINE_TABLE." (  `SO_NUM`, `PROD_ID`, `SO_LINE_NETPR`, `SO_LINE_QTY` ,`CITY_NAME`     varchar(45) NOT NULL,)
+        VALUES (:SO_NUM, :PROD_ID, :SO_LINE_NETPR, :SO_LINE_QTY , :CITY_NAME );";
+        $params = array(
+            'SO_NUM' => $so_line->SO_NUM, 
+            'PROD_ID' => $so_line->PROD_ID, 
+            'SO_LINE_NETPR' => $so_line->SO_LINE_NETPR, 
+            'SO_LINE_QTY' => $so_line->SO_LINE_QTY,
+            'CITY_NAME' => $so_line->CITY_NAME
+          );
+          self::beginTransaction();
+          try{
+              self::exec($query, $params);
+              self::commit();
+              
+          }
+          catch (PDOException $ex) {
+              self::rollBack();
+              return false;
+          }
+          $so_header = self::find_header($so_line->SO_NUM);
+          $so_header->SO_TOTAL = $so_header->SO_TOTAL + ($so_line->SO_LINE_NETPR * $so_line->SO_LINE_QTY)
+          self::save_header($so_header);
+          return $so_line;
+    }
+
+    public static function find_header($so_num){
+        $query = "SELECT * FROM ".SalesDao::$SO_HEADER_TABLE." WHERE SO_NUM = :so_num";
+        return self::justOne(self::execute($query, "SO_HEADER", array(
+            'so_num' => $so_num
+         )));
+    }
+}
 //echo json_encode(array_merge(['PRODUCTS' => ProductDao::allProducts()]));
 //echo json_encode(array_merge(['PRODUCTS' => ProductDao::stock(4)]));
 //echo json_encode(array_merge( ProductDao::searchProducts($_GET["max_price"],$_GET["name"],$_GET["category"],$_GET["max_mass"],$_GET["city"])));
 
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $data = json_decode(file_get_contents('php://input'));
+    echo json_encode($data);
 
+    //json should look like this:
+    //{"resources":"sales","products":[{"prod_id":"4", "quantity":"2", "city":"Paris"},{"prod_id":"4", "quantity":"2", "city":"Paris"}] }
+    if($data->resources == "sales"){
+        foreach ($data->products as $variable) {
+            echo $variable->prod_id;
+        }
+    }
+    die();
+}
 
 if(isset($_GET["resources"])){
 
@@ -355,20 +446,20 @@ if(isset($_GET["resources"])){
             if($_GET["username"] && $_GET["firstname"] && $_GET["lastname"] && $_GET["password"] && $_GET["address"] && $_GET["city"] 
             && $_GET["zip"]){
                 $customer = new CUSTOMER();
-                $customer->$CUST_UNAME = $_GET["username"];
-                $customer->$CUST_FNAME = $_GET["firstname"];
-                $customer->$CUST_LNAME = $_GET["lastname"];
-                $customer->$CUST_PWD = sha1($_GET["password"]);
-                $customer->$CUST_ADDR = $_GET["address"];
-                $customer->$CUST_CITY = $_GET["city"];
-                $customer->$CUST_ZIP = $_GET["zip"];
-                $customer->$CUST_IS_ADMIN = 0;
-                $customer->$CUST_IS_BLOCKED = 0;
+                $customer->CUST_UNAME = $_GET["username"];
+                $customer->CUST_FNAME = $_GET["firstname"];
+                $customer->CUST_LNAME = $_GET["lastname"];
+                $customer->CUST_PWD = sha1($_GET["password"]);
+                $customer->CUST_ADDR = $_GET["address"];
+                $customer->CUST_CITY = $_GET["city"];
+                $customer->CUST_ZIP = $_GET["zip"];
+                $customer->CUST_IS_ADMIN = 0;
+                $customer->CUST_IS_BLOCKED = 0;
                 if(CustomerDao::getByUsername($_REQUEST["username"])){
                     echoJsonError(new Exception('Username already exists', 409));
                 }
                 else {
-                    $user = CustomerDao::save($customer);
+                    $customer = CustomerDao::save($customer);
                     if($customer) {
                         $_SESSION['customer'] = $customer;
                         echo json_encode($customer);
@@ -390,10 +481,6 @@ if(isset($_GET["resources"])){
                     die();
                 }
                 else {
-                    echo json_encode(sha1("secret"));
-                    echo json_encode(sha1("admin"));
-                    echo json_encode(sha1("Admin"));
-                    echo json_encode(sha1("foodtastic"));
                     echoJsonError(new Exception('Username<>Password combination not found', 204));
                 }
             }
@@ -403,13 +490,51 @@ if(isset($_GET["resources"])){
         }elseif($_REQUEST["action"] == "logout") {
             unset($_SESSION['customer']);
             echoJsonError(new Exception('You have been succesfully logged out', 200));
-        }else{
+        }elseif($_GET["action"] == "update"){
+            if($_GET["username"] && $_GET["firstname"] && $_GET["lastname"] && $_GET["password"] && $_GET["address"] && $_GET["city"] 
+            && $_GET["zip"]){
+                if($_GET["username"] && $_GET["password"]){
+                    $customer = CustomerDao::checkUsernameAndPwd($_REQUEST["username"], $_REQUEST["password"]);
+                    if($customer) {
+                        $_SESSION['customer'] = $customer;
+                    }
+                }
+                if ($customer) {
+                    $customer->CUST_UNAME = $_GET["username"];
+                    $customer->CUST_FNAME = $_GET["firstname"];
+                    $customer->CUST_LNAME = $_GET["lastname"];
+                    $customer->CUST_PWD = sha1($_GET["password"]);
+                    $customer->CUST_ADDR = $_GET["address"];
+                    $customer->CUST_CITY = $_GET["city"];
+                    $customer->CUST_ZIP = $_GET["zip"];
+                    $customer->CUST_IS_ADMIN = 0;
+                    $customer->CUST_IS_BLOCKED = 0;
+                    $customer = CustomerDao::save($customer);
+                    if($customer) {
+                        $_SESSION['customer'] = $customer;
+                        echo json_encode($customer);
+                        die();
+                    }else{
+                        echoJsonError(new Exception('An error occureed while saving customer', 502));
+                    }
+                }else{
+                    echoJsonError(new Exception('invalid credentials used', 409));
+                }
+                
+            }else{
+                echoJsonError(new Exception('wrong or missing customer details', 400));
+            }
+        
+        }
+        else{
             echoJsonError(new Exception('no action selected or doesnt exist', 400));
         }
     }else{
         echoJsonError(new Exception('this resource doesnt exist', 404));
     }
-
-}else{
+}
+else{
     echoJsonError(new Exception('No resource selected!', 404));
 }
+
+
