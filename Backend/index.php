@@ -37,7 +37,7 @@ abstract class DBHelper {
             ));
             }
             catch (Exception $e) {
-                echoJsonError($e)
+                echoJsonError($e);
             }
         }
         return self::$PDOInstance;
@@ -97,7 +97,7 @@ abstract class DBHelper {
                 $request->execute();
                 $result = $request->fetchAll(PDO::FETCH_CLASS, $objectType);
             } catch(PDOException $ex) {
-                echoJsonError($e)
+                echoJsonError($e);
             }
             return $result;
         }
@@ -123,7 +123,7 @@ abstract class DBHelper {
                 $request->execute();
                 $result = $request->fetchAll(PDO::FETCH_CLASS, $objectType);
             } catch(PDOException $ex) {
-                echoJsonError($e)
+                echoJsonError($e);
             }
             
             return $result;
