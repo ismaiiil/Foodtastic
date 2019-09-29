@@ -8,7 +8,8 @@ import ShoppingBasket from "@material-ui/icons/ShoppingBasket";
 import List from "@material-ui/core/List";
 import Collapse from "@material-ui/core/Collapse";
 import { useStyles } from "./navStyle";
-
+import Tooltip from "@material-ui/core/Tooltip";
+import { Link } from "react-router-dom";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 const SecondaryListItems = () => {
@@ -20,27 +21,43 @@ const SecondaryListItems = () => {
   };
   return (
     <div>
-      <ListItem button onClick={() => handleAdminClick()}>
-        <ListItemIcon>
-          <AssignmentInd />
-        </ListItemIcon>
-        <ListItemText primary="Administration" />
-        {openAdmin ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
+      <Tooltip title="Admin" placement="right-start">
+        <ListItem button onClick={() => handleAdminClick()}>
+          <ListItemIcon>
+            <AssignmentInd />
+          </ListItemIcon>
+          <ListItemText primary="Administration" />
+          {openAdmin ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+      </Tooltip>
       <Collapse in={openAdmin} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItem button className={classes.nested}>
-            <ListItemIcon>
-              <ShoppingBasket />
-            </ListItemIcon>
-            <ListItemText primary="Products" />
-          </ListItem>
-          <ListItem button className={classes.nested}>
-            <ListItemIcon>
-              <Group />
-            </ListItemIcon>
-            <ListItemText primary="Users" />
-          </ListItem>
+          <Tooltip title="Product Management" placement="right-start">
+            <ListItem
+              button
+              className={classes.nested}
+              component={Link}
+              to="/manageproducts"
+            >
+              <ListItemIcon>
+                <ShoppingBasket />
+              </ListItemIcon>
+              <ListItemText primary="Products" />
+            </ListItem>
+          </Tooltip>
+          <Tooltip title="User Management" placement="right-start">
+            <ListItem
+              button
+              className={classes.nested}
+              component={Link}
+              to="/manageusers"
+            >
+              <ListItemIcon>
+                <Group />
+              </ListItemIcon>
+              <ListItemText primary="Users" />
+            </ListItem>
+          </Tooltip>
         </List>
       </Collapse>
     </div>

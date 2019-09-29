@@ -13,9 +13,10 @@ import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
 import Container from "@material-ui/core/Container";
 import { Link } from "react-router-dom";
+import SearchIcon from "@material-ui/icons/Search";
+
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import NotificationsIcon from "@material-ui/icons/Notifications";
 import MainListItems from "./MainListItems";
 import SecondaryListItems from "./SecondaryListItems";
 import { useStyles } from "./navStyle";
@@ -25,6 +26,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import InputBase from "@material-ui/core/InputBase";
+import Tooltip from "@material-ui/core/Tooltip";
+
 const Navbar = props => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
@@ -79,21 +83,35 @@ const Navbar = props => {
           >
             FoodTastic
           </Typography>
-
-          <IconButton
-            aria-label="delete"
-            className={classes.navBtn}
-            size="medium"
-            color="inherit"
-          >
-            <Badge
-              color="secondary"
-              badgeContent={4}
-              onClick={() => handleClickOpenDialog()}
+          <div className={classes.search}>
+            <div className={classes.searchIcon}>
+              <SearchIcon />
+            </div>
+            <InputBase
+              placeholder="Search…"
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput
+              }}
+              inputProps={{ "aria-label": "search" }}
+            />
+          </div>
+          <Tooltip title="Your Cart">
+            <IconButton
+              aria-label="delete"
+              className={classes.navBtn}
+              size="medium"
+              color="inherit"
             >
-              <ShoppingCartIcon fontSize="inherit" />
-            </Badge>
-          </IconButton>
+              <Badge
+                color="secondary"
+                badgeContent={4}
+                onClick={() => handleClickOpenDialog()}
+              >
+                <ShoppingCartIcon fontSize="inherit" />
+              </Badge>
+            </IconButton>
+          </Tooltip>
           {isLogged ? (
             <Button
               variant="outlined"
