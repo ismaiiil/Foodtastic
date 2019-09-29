@@ -214,10 +214,68 @@ class FOOD_GROUP {
     public function __construct(){ }
 }
 
+class CUSTOMER {
+    public $CUST_UNAME;
+    public $CUST_FNAME;
+    public $CUST_LNAME;
+    public $CUST_PWD;
+    public $CUST_ADDR ;
+    public $CUST_CITY;
+    public $CUST_ZIP;
+    public $CUST_IS_ADMIN;
+    public $CUST_IS_BLOCKED;
+    public function __construct(){ }
+}
+
+class CustomerDao extends DBHelper {
+    public static $TABLE = "CUSTOMER";
+
+    public static function save(CUSTOMER $customer){
+        $query = "INSERT INTO ".CustomerDao::$TABLE." (`CUST_UNAME`,`CUST_FNAME`,`CUST_LNAME`,`CUST_PWD`,`CUST_ADDR`,`CUST_CITY`,`CUST_ZIP`,`CUST_IS_ADMIN`,`CUST_IS_BLOCKED`) "
+                . "VALUES ( :CUST_UNAME, :CUST_FNAME, :CUST_LNAME, :CUST_PWD, :CUST_ADDR, :CUST_CITY, :CUST_ZIP, :CUST_IS_ADMIN, :CUST_IS_BLOCKED);";
+          $params = array(
+            'CUST_UNAME' => $customer->$CITY_NAME, 
+            'CUST_FNAME' => $customer->$CUST_FNAME, 
+            'CUST_LNAME' => $customer->$CUST_LNAME, 
+            'CUST_PWD' => $customer->$CUST_PWD, 
+            'CUST_ADDR' => $customer->$CUST_ADDR, 
+            'CUST_CITY' => $customer->$CUST_CITY, 
+            'CUST_ZIP' => $customer->$CUST_ZIP, 
+            'CUST_IS_ADMIN' => $customer->$CUST_IS_ADMINCIA, 
+            'CUST_IS_BLOCKED' => $customer->$CUST_IS_BLOCKED
+          );
+          self::beginTransaction();
+          try{
+              
+              self::exec($query, $params);
+              self::commit();
+          }
+          catch (PDOException $ex) {
+              self::rollBack();
+              return false;
+          }
+          return $user;
+    }
+
+    public static function getByUsername($username) {
+        $query = "SELECT * FROM ".CustomerDao::$TABLE." WHERE CUST_UNAME = :CUST_UNAME";
+        return self::justOne(self::execute($query, "CUSTOMER", array('CUST_UNAME' => $userName)));
+    }
+
+    public static function checkUsernameAndPwd($username,$password){
+        $query = "SELECT * FROM ".CustomerDao::$TABLE." WHERE CUST_UNAME = :username AND CUST_PWD = :password";
+        return self::justOne(self::execute($query, "CUSTOMER", array(
+            'username' => $username,
+            'password' => sha1($password)
+         )));
+    }
+
+}
+
 class ProductDao extends DBHelper {
     public static $PRODUCT_TABLE = "PRODUCT";
     public static $STOCK_TABLE = "STOCK";
-    public static $VENDOR = "VENDOR";
+    public static $VENDOR_TABLE = "VENDOR";
 
 
     public static function allProducts(){
@@ -235,7 +293,7 @@ class ProductDao extends DBHelper {
          $query ="SELECT P.PROD_ID, P.PROD_NAME,P.PROD_MASS, V.VEND_NAME, P.PROD_NETPR, P.FOOD_CAT, P.FOOD_IMG, S.STOCK_QTY, S.CITY_NAME
                     FROM ".ProductDao::$STOCK_TABLE." AS S
                     RIGHT OUTER JOIN ".ProductDao::$PRODUCT_TABLE." AS P ON S.PROD_ID = P.PROD_ID
-                    RIGHT OUTER JOIN ".ProductDao::$VENDOR." AS V ON P.VEND_ID = V.VEND_ID
+                    RIGHT OUTER JOIN ".ProductDao::$VENDOR_TABLE." AS V ON P.VEND_ID = V.VEND_ID
                     WHERE P.PROD_NAME LIKE '%".$name_search."%'";
         
         if(!empty($max_price)){
@@ -290,15 +348,68 @@ if(isset($_GET["resources"])){
             echo json_encode(array_merge(['data' => ProductDao::searchProducts($_GET["max_price"],$_GET["name"],$_GET["category"],$_GET["max_mass"],$_GET["city"])]));
             die();
         }else{
-            echoJsonError(new Exception('no action selected', 400));
+            echoJsonError(new Exception('no action selected or doesnt exist', 400));
+        }
+    }elseif($_GET["resources"] == "customer"){
+        if($_GET["action"] == "register"){
+            if($_GET["username"] && $_GET["firstname"] && $_GET["lastname"] && $_GET["password"] && $_GET["address"] && $_GET["city"] 
+            && $_GET["zip"]){
+                $customer = new CUSTOMER();
+                $customer->$CUST_UNAME = $_GET["username"];
+                $customer->$CUST_FNAME = $_GET["firstname"];
+                $customer->$CUST_LNAME = $_GET["lastname"];
+                $customer->$CUST_PWD = sha1($_GET["password"]);
+                $customer->$CUST_ADDR = $_GET["address"];
+                $customer->$CUST_CITY = $_GET["city"];
+                $customer->$CUST_ZIP = $_GET["zip"];
+                $customer->$CUST_IS_ADMIN = 0;
+                $customer->$CUST_IS_BLOCKED = 0;
+                if(CustomerDao::getByUsername($_REQUEST["username"])){
+                    echoJsonError(new Exception('Username already exists', 409));
+                }
+                else {
+                    $user = CustomerDao::save($customer);
+                    if($customer) {
+                        $_SESSION['customer'] = $customer;
+                        echo json_encode($customer);
+                        die();
+                    }else{
+                        echoJsonError(new Exception('An error occureed while saving customer', 502));
+                    }
+                }
+            }else{
+                echoJsonError(new Exception('wrong or missing customer details', 400));
+            }
+            
+        }elseif($_GET["action"] == "login"){
+            if($_GET["username"] && $_GET["password"]){
+                $customer = CustomerDao::checkUsernameAndPwd($_GET["username"], $_GET["password"]);
+                if($customer) {
+                    $_SESSION['customer'] = $customer;
+                    echo json_encode($customer);
+                    die();
+                }
+                else {
+                    echo json_encode(sha1("secret"));
+                    echo json_encode(sha1("admin"));
+                    echo json_encode(sha1("Admin"));
+                    echo json_encode(sha1("foodtastic"));
+                    echoJsonError(new Exception('Username<>Password combination not found', 204));
+                }
+            }
+            else {
+                echoJsonError(new Exception('missing parameters', 400));
+            }
+        }elseif($_REQUEST["action"] == "logout") {
+            unset($_SESSION['customer']);
+            echoJsonError(new Exception('You have been succesfully logged out', 200));
+        }else{
+            echoJsonError(new Exception('no action selected or doesnt exist', 400));
         }
     }else{
         echoJsonError(new Exception('this resource doesnt exist', 404));
     }
 
- 
-    
-   
-
-
+}else{
+    echoJsonError(new Exception('No resource selected!', 404));
 }
