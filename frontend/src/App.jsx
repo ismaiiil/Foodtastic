@@ -8,6 +8,7 @@ import Home from "./Pages/Home";
 import Navbar from "./Pages/Components/Navbar";
 import ManageUsers from "./Pages/Admin/Users";
 import ManageProducts from "./Pages/Admin/Products";
+import Cart from "./Pages/Cart/cart";
 
 function App() {
   const isLogged = useStoreState(state => state.user.isLogged);
@@ -25,6 +26,7 @@ function App() {
             <Route path="/signup" component={SignUp}></Route>
             <Route path="/manageusers" component={ManageUsers}></Route>
             <Route path="/manageproducts" component={ManageProducts}></Route>
+            <Route path="/cart" component={Cart}></Route>
           </Switch>
         </Navbar>
       </div>

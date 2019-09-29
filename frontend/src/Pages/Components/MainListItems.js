@@ -28,7 +28,12 @@ const MainListItems = () => {
       <Tooltip title="Your cart" placement="right-start">
         <ListItem button>
           <ListItemIcon>
-            <Badge color="secondary" badgeContent={4}>
+            <Badge
+              color="secondary"
+              badgeContent={4}
+              component={Link}
+              to="/cart"
+            >
               <ShoppingCartIcon />
             </Badge>
           </ListItemIcon>
