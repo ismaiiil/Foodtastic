@@ -80,5 +80,11 @@ export const useStyles = makeStyles(theme => ({
   },
   navBtn: {
     margin: theme.spacing(1)
+  },
+  margin: {
+    margin: theme.spacing(2)
+  },
+  nested: {
+    paddingLeft: theme.spacing(4)
   }
 }));

@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
 import AppBar from "@material-ui/core/AppBar";
@@ -15,13 +16,18 @@ import { Link } from "react-router-dom";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import NotificationsIcon from "@material-ui/icons/Notifications";
-import { mainListItems, secondaryListItems } from "./ListItems";
+import MainListItems from "./MainListItems";
+import SecondaryListItems from "./SecondaryListItems";
 import { useStyles } from "./navStyle";
 import { useStoreState, useStoreActions } from "easy-peasy";
-
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 const Navbar = props => {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -31,16 +37,19 @@ const Navbar = props => {
   const signOut = () => {
     setIsLogged(false);
   };
-  const redirectToSignIn = () => {
-    props.history.push("/signin");
-  };
-  const redirectToSignUp = () => {
-    props.history.push("/signup");
-  };
+
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const isLogged = useStoreState(state => state.user.isLogged);
   const setIsLogged = useStoreActions(actions => actions.user.setIsLogged);
+  const [openDialog, setOpenDialog] = React.useState(false);
 
+  const handleClickOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -70,11 +79,21 @@ const Navbar = props => {
           >
             FoodTastic
           </Typography>
-          {/* <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
+
+          <IconButton
+            aria-label="delete"
+            className={classes.navBtn}
+            size="medium"
+            color="inherit"
+          >
+            <Badge
+              color="secondary"
+              badgeContent={4}
+              onClick={() => handleClickOpenDialog()}
+            >
+              <ShoppingCartIcon fontSize="inherit" />
             </Badge>
-          </IconButton> */}
+          </IconButton>
           {isLogged ? (
             <Button
               variant="outlined"
@@ -121,9 +140,13 @@ const Navbar = props => {
           </IconButton>
         </div>
         <Divider />
-        <List>{mainListItems}</List>
+        <List>
+          <MainListItems />
+        </List>
         <Divider />
-        <List>{secondaryListItems}</List>
+        <List>
+          <SecondaryListItems />
+        </List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
@@ -131,6 +154,28 @@ const Navbar = props => {
           {props.children}
         </Container>
       </main>
+
+      <Dialog
+        open={openDialog}
+        onClose={() => handleCloseDialog()}
+        aria-labelledby="form-dialog-title"
+      >
+        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            To subscribe to this website, please enter your email address here.
+            We will send updates occasionally.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleCloseDialog()} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={() => handleCloseDialog()} color="primary">
+            Subscribe
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
