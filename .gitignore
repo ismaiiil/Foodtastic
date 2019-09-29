@@ -67,3 +67,5 @@ dist/
 *.suo
 *.ntvs*
 *.sln
+.vagrant
+.images
