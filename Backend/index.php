@@ -1,4 +1,4 @@
 <?php
 @session_start();
-echo "test";
-echo "test".$_SESSION["test"];
+echo sha1("foodtastiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac");
+echo strlen(sha1("foodtastic"));

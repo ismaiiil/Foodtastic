@@ -30,12 +30,15 @@ until mysqladmin ping -psecret; do
 	sleep 2
 done
 
+mysql -u root -e 'DROP DATABASE IF EXISTS foodtastic' -psecret
 mysql -u root -e 'CREATE DATABASE foodtastic' -psecret
 mysql -u root -e "CREATE USER 'foodtastic'@'%' identified by 'foodtastic'" -psecret
 mysql -u root -psecret foodtastic < /vagrant/Backend/SQL/create_tables.sql
 mysql -u root -e  "ALTER USER 'foodtastic' IDENTIFIED BY 'foodtastic';" -psecret
 mysql -u root -psecret -e "GRANT ALL PRIVILEGES ON foodtastic.* TO 'foodtastic'@'%';"
 mysql -u root -psecret -e "FLUSH PRIVILEGES;"
+mysql -u root -psecret foodtastic < /vagrant/Backend/SQL/seed_tables.sql
+
 SCRIPT
 
 
