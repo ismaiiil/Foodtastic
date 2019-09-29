@@ -30,7 +30,7 @@ export default {
     signOutRes: thunk(async (actions, url) => {
       const res = await fetch(url);
       const data = await res.json();
-      if (data.error.code == "200") {
+      if (data.error.code === "200") {
         actions.setSignedOut(true);
       } else {
         actions.setSignedOut(false);

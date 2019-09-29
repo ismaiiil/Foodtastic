@@ -28,13 +28,13 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
+import Cart from "../Cart/cart";
 
 const Navbar = props => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const signOutRes = useStoreActions(actions => actions.user.signOutRes);
   const signedOut = useStoreState(state => state.user.signedOut);
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   const isLogged = useStoreState(state => state.user.isLogged);
   const setIsLogged = useStoreActions(actions => actions.user.setIsLogged);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -186,19 +186,17 @@ const Navbar = props => {
         onClose={() => handleCloseDialog()}
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            To subscribe to this website, please enter your email address here.
-            We will send updates occasionally.
-          </DialogContentText>
+        <DialogTitle id="form-dialog-title">Your Cart</DialogTitle>
+
+        <DialogContent style={{ width: "100%" }}>
+          <Cart displayTitle={false}></Cart>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => handleCloseDialog()} color="primary">
-            Cancel
+            Close
           </Button>
           <Button onClick={() => handleCloseDialog()} color="primary">
-            Subscribe
+            Checkout
           </Button>
         </DialogActions>
       </Dialog>

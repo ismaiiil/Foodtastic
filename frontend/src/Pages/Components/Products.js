@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import Button from "@material-ui/core/Button";
 
@@ -49,8 +49,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
 const Products = props => {
   const classes = useStyles();
   const [productList, setProductList] = React.useState([]);
@@ -64,59 +62,57 @@ const Products = props => {
     });
   }, [isLoaded]);
 
-  {
-    if (isLoaded) {
-      return (
-        <React.Fragment>
-          <CssBaseline />
-          <main>
-            {console.log(productList.data)}
-            <Container className={classes.cardGrid}>
-              {/* End hero unit */}
-              <Grid container spacing={4}>
-                {productList.data.map(card => (
-                  <Grid item key={card} xs={12} sm={6} md={4}>
-                    <Card className={classes.card}>
-                      <CardMedia
-                        className={classes.cardMedia}
-                        image={card.FOOD_IMG}
-                        title={card.PROD_NAME}
-                      />
-                      <CardContent className={classes.cardContent}>
-                        <Typography gutterBottom variant="h5" component="h2">
-                          {card.PROD_NAME}
-                        </Typography>
-                        <Typography>{card.PROD_NETPR + "€"}</Typography>
-                        <Typography>{card.CITY_NAME}</Typography>
-                      </CardContent>
-                      <CardActions
-                        display="flex"
-                        justifyContent="space-between"
-                        flexDirection="row"
-                        className={classes.cardActions}
-                      >
-                        <Button size="small" color="primary">
-                          View
-                        </Button>
-                        <Button size="small" color="primary">
-                          Add to cart
-                        </Button>
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Container>
-          </main>
-        </React.Fragment>
-      );
-    } else {
-      return (
-        <Box display="flex" justifyContent="center" alignContent="center">
-          <CircularProgress className={classes.progress} />
-        </Box>
-      );
-    }
+  if (isLoaded) {
+    return (
+      <React.Fragment>
+        <CssBaseline />
+        <main>
+          <Container className={classes.cardGrid}>
+            {/* End hero unit */}
+            <Grid container spacing={4}>
+              {productList.data.map(card => (
+                <Grid item key={card} xs={12} sm={6} md={4}>
+                  <Card className={classes.card}>
+                    <CardMedia
+                      className={classes.cardMedia}
+                      image={card.FOOD_IMG}
+                      alt={card.PROD_NAME}
+                      title={card.PROD_NAME}
+                    />
+                    <CardContent className={classes.cardContent}>
+                      <Typography gutterBottom variant="h5" component="h2">
+                        {card.PROD_NAME}
+                      </Typography>
+                      <Typography>{card.PROD_NETPR + "€"}</Typography>
+                      <Typography>{card.CITY_NAME}</Typography>
+                    </CardContent>
+                    <CardActions
+                      display="flex"
+                      justifyContent="space-between"
+                      flexDirection="row"
+                      className={classes.cardActions}
+                    >
+                      <Button size="small" color="primary">
+                        View
+                      </Button>
+                      <Button size="small" color="primary">
+                        Add to cart
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </main>
+      </React.Fragment>
+    );
+  } else {
+    return (
+      <Box display="flex" justifyContent="center" alignContent="center">
+        <CircularProgress className={classes.progress} />
+      </Box>
+    );
   }
 };
 

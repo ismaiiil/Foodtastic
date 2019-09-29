@@ -12,7 +12,7 @@ import { useStyles } from "./navStyle";
 import { Link } from "react-router-dom";
 
 const MainListItems = () => {
-  const classes = useStyles();
+  // const classes = useStyles();
 
   return (
     <div>

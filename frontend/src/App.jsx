@@ -2,7 +2,7 @@ import React from "react";
 import "./App.css";
 import SignIn from "./Pages/SignIn";
 import SignUp from "./Pages/SignUp";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { useStoreState } from "easy-peasy";
 import Home from "./Pages/Home";
 import Navbar from "./Pages/Components/Navbar";
@@ -26,7 +26,7 @@ function App() {
 
             <Route path="/signup" component={SignUp}></Route>
             {console.log(user.isAdmin + "icic sa")}
-            {user.isAdmin == 1 ? (
+            {user.isAdmin === 1 ? (
               <React.Fragment>
                 <Route path="/manageusers" component={ManageUsers}></Route>
                 <Route
@@ -36,7 +36,10 @@ function App() {
               </React.Fragment>
             ) : null}
 
-            <Route path="/cart" component={Cart}></Route>
+            <Route
+              path="/cart"
+              component={() => <Cart displayTitle={true} />}
+            ></Route>
           </Switch>
         </Navbar>
       </div>

@@ -103,15 +103,4 @@ const SignUp = () => {
   );
 };
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      FoodTastic
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
-
 export default SignUp;
