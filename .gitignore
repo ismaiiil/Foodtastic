@@ -68,4 +68,8 @@ dist/
 *.ntvs*
 *.sln
 .vagrant
-.images
+Backend/.images/*
+Backend/.receipts/*
+# Allowing empty folders
+!Backend/.images/.gitkeep 
+!Backend/.receipts/.gitkeep 

@@ -11,13 +11,6 @@ Vagrant.configure("2") do |config|
     web.vm.box = "brownell/xenial64lemp"
     web.vm.network :private_network, ip: "10.0.0.10"
     web.vm.network "forwarded_port", guest: 3306, host: 3306, protocol: "tcp"
-  end
-
-  config.vm.define "backup" do |backup|
-    backup.vm.box = "brownell/xenial64lemp"
-    backup.vm.network :private_network, ip: "10.0.0.11"
-  end
-
   update = <<'SCRIPT'
 # update system before we install anything
 sudo apt-get update && sudo apt-get -y upgrade 
@@ -41,10 +34,36 @@ mysql -u root -psecret foodtastic < /vagrant/Backend/SQL/seed_tables.sql
 
 SCRIPT
 
+  setup_nginx = <<'SCRIPT'
+#remove default nginx config
+sudo rm /etc/nginx/sites-available/default
+#copy nginx congfig file from host to destination
+sudo cp /vagrant/tobecopied/default /etc/nginx/sites-available/default
+#restart services
+sudo service nginx restart && sudo service php7.1-fpm restart
+
+SCRIPT
+
+  setup_images = <<'SCRIPT'
+#copy images to destination folder
+sudo cp -a /vagrant/tobecopied/seedimages/. /vagrant/Backend/.images
+
+SCRIPT
 
   script = ''
-  #script += update
   script += setup_sql
-  config.vm.provision :shell, :inline => script
+  script += setup_nginx
+  script += setup_images
+  web.vm.provision :shell, :inline => script
+
+
+
+  end
+
+  config.vm.define "backup" do |backup|
+    backup.vm.box = "brownell/xenial64lemp"
+    backup.vm.network :private_network, ip: "10.0.0.11"
+  end
+
 
 end

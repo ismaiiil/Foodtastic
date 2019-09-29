@@ -72,6 +72,7 @@ CREATE TABLE `foodtastic`.`PRODUCT`
  `VEND_ID`    int NOT NULL ,
  `PROD_NETPR` decimal(12,2) NOT NULL ,
  `FOOD_CAT`   varchar(45) NULL ,
+ `FOOD_IMG`   varchar(150) NULL,
 
 PRIMARY KEY (`PROD_ID`),
 UNIQUE KEY `AK1_PROD_VEND_ID` (`PROD_NAME`, `VEND_ID`),
