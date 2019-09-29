@@ -3,18 +3,37 @@ import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import { Link } from "react-router-dom";
-import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { useStyles } from "./style";
 import Container from "@material-ui/core/Container";
+import { useStoreActions } from "easy-peasy";
 
 const SignIn = props => {
   const classes = useStyles();
+  const fetchUser = useStoreActions(actions => actions.user.fetchUser);
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const handleSignIn = () => {
+    let url =
+      "http://10.0.0.10/?resources=customer&action=login&username=" +
+      username +
+      "&password=" +
+      password;
+    console.log(url);
+    fetchUser(url);
+    props.history.push("/");
+  };
+
+  const onPasswordChange = () => event => {
+    setPassword(event.target.value);
+  };
+  const onUsernameChange = () => event => {
+    setUsername(event.target.value);
+  };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -35,6 +54,8 @@ const SignIn = props => {
             id="email"
             label="Email Address"
             name="email"
+            value={username}
+            onChange={onUsernameChange()}
             autoComplete="email"
             autoFocus
           />
@@ -45,29 +66,23 @@ const SignIn = props => {
             fullWidth
             name="password"
             label="Password"
+            value={password}
             type="password"
             id="password"
+            onChange={onPasswordChange()}
             autoComplete="current-password"
           />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
+
           <Button
-            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
+            onClick={() => handleSignIn()}
           >
             Sign In
           </Button>
           <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
             <Grid item>
               <Link to="/signup">
                 <li> {"Don't have an account? Sign Up"}</li>
@@ -76,21 +91,8 @@ const SignIn = props => {
           </Grid>
         </form>
       </div>
-      <Box mt={8}>
-        <Copyright />
-      </Box>
     </Container>
   );
 };
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      FoodTastic
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
 export default SignIn;

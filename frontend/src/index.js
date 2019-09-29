@@ -3,20 +3,32 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import { StoreProvider, createStore, action } from "easy-peasy";
+import { StoreProvider, createStore } from "easy-peasy";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import { PersistGate } from "redux-persist/integration/react";
+import model from "./model";
 
-const store = createStore({
-  user: {
-    isLogged: true,
-    setIsLogged: action((state, bool) => {
-      state.isLogged = bool;
-    })
-  }
+//persist global state
+const store = createStore(model, {
+  reducerEnhancer: reducer =>
+    persistReducer(
+      {
+        key: "easypeasystate",
+        storage
+      },
+      reducer
+    )
 });
+//make persitance over store
+const persistor = persistStore(store);
+
 ReactDOM.render(
-  <StoreProvider store={store}>
-    <App />
-  </StoreProvider>,
+  <PersistGate loading={<div>Loading</div>} persistor={persistor}>
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>
+  </PersistGate>,
   document.getElementById("root")
 );
 

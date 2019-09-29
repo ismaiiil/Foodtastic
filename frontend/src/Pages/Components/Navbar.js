@@ -32,20 +32,28 @@ import Tooltip from "@material-ui/core/Tooltip";
 const Navbar = props => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const signOutRes = useStoreActions(actions => actions.user.signOutRes);
+  const signedOut = useStoreState(state => state.user.signedOut);
+  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const isLogged = useStoreState(state => state.user.isLogged);
+  const setIsLogged = useStoreActions(actions => actions.user.setIsLogged);
+  const [openDialog, setOpenDialog] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
   const handleDrawerClose = () => {
     setOpen(false);
   };
-  const signOut = () => {
-    setIsLogged(false);
-  };
+  const handleSignOut = () => {
+    let url = "http://10.0.0.10/?resources=customer&action=logout";
 
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-  const isLogged = useStoreState(state => state.user.isLogged);
-  const setIsLogged = useStoreActions(actions => actions.user.setIsLogged);
-  const [openDialog, setOpenDialog] = React.useState(false);
+    signOutRes(url);
+    if (signedOut) {
+      setIsLogged(false);
+    } else {
+      return;
+    }
+  };
 
   const handleClickOpenDialog = () => {
     setOpenDialog(true);
@@ -117,7 +125,7 @@ const Navbar = props => {
               variant="outlined"
               className={classes.navBtn}
               color="inherit"
-              onClick={() => signOut()}
+              onClick={() => handleSignOut()}
             >
               Sign Out
             </Button>

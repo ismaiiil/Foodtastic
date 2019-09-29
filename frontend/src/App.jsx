@@ -12,7 +12,8 @@ import Cart from "./Pages/Cart/cart";
 
 function App() {
   const isLogged = useStoreState(state => state.user.isLogged);
-
+  const user = useStoreState(state => state.user.user);
+  console.log(user);
   return (
     <Router>
       <div className="App">
@@ -24,8 +25,17 @@ function App() {
             )}
 
             <Route path="/signup" component={SignUp}></Route>
-            <Route path="/manageusers" component={ManageUsers}></Route>
-            <Route path="/manageproducts" component={ManageProducts}></Route>
+            {console.log(user.isAdmin + "icic sa")}
+            {user.isAdmin == 1 ? (
+              <React.Fragment>
+                <Route path="/manageusers" component={ManageUsers}></Route>
+                <Route
+                  path="/manageproducts"
+                  component={ManageProducts}
+                ></Route>
+              </React.Fragment>
+            ) : null}
+
             <Route path="/cart" component={Cart}></Route>
           </Switch>
         </Navbar>
