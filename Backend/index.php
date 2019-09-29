@@ -1,13 +1,20 @@
 <?php
 @session_start();
+
+function echoJsonError($e){
+    echo json_encode(array(
+        'error' => array(
+            'msg' => $e->getMessage(),
+            'code' => $e->getCode(),
+        ),
+    ));
+    die();
+}
+
 abstract class DBHelper {
     
     
     private static $PDOInstance = null;
-  
-    private static $error = false;
-  
-    //private static $instance = null;
 
     const DEFAULT_SQL_TYPE = "mysql";
   
@@ -30,16 +37,12 @@ abstract class DBHelper {
             ));
             }
             catch (Exception $e) {
-                self::$error = true;
-                die('Error : ' . $e->getMessage());
+                echoJsonError($e)
             }
         }
         return self::$PDOInstance;
     }
   
-    public static function isInError() {  
-        return self::$error;
-    }
     
     
     public static function prepare($query) {
@@ -94,7 +97,7 @@ abstract class DBHelper {
                 $request->execute();
                 $result = $request->fetchAll(PDO::FETCH_CLASS, $objectType);
             } catch(PDOException $ex) {
-                self::$error = true;
+                echoJsonError($e)
             }
             return $result;
         }
@@ -120,7 +123,7 @@ abstract class DBHelper {
                 $request->execute();
                 $result = $request->fetchAll(PDO::FETCH_CLASS, $objectType);
             } catch(PDOException $ex) {
-                self::$error = true;
+                echoJsonError($e)
             }
             
             return $result;
@@ -182,25 +185,120 @@ abstract class DBHelper {
    
 }
 
-class Product {
+class FINAL_PRODUCT {
     public $PROD_ID;
     public $PROD_NAME;
+    public $PROD_MASS;
+    public $VEND_NAME;
+    public $PROD_NETPR;
+    public $FOOD_CAT;
+    public $FOOD_IMG;
+    public $STOCK_QTY;
+    public $CITY_NAME;
+    public function __construct(){ }
+}
+
+class PRODUCT{
+    public $PROD_ID;
+    public $PROD_NAME;
+    public $PROD_MASS;
     public $VEND_ID;
     public $PROD_NETPR;
     public $FOOD_CAT;
-
+    public $FOOD_IMG;
     public function __construct(){ }
+}
 
+class FOOD_GROUP {
+    public $FOOD_CAT;
+    public function __construct(){ }
 }
 
 class ProductDao extends DBHelper {
-    public static $TABLE = "PRODUCT";
-    public static function listAllProducts() {
-    
-        $query = "SELECT * FROM ".ProductDao::$TABLE.";";
-      
+    public static $PRODUCT_TABLE = "PRODUCT";
+    public static $STOCK_TABLE = "STOCK";
+    public static $VENDOR = "VENDOR";
+
+
+    public static function allProducts(){
+        $query ="SELECT* FROM ".ProductDao::$PRODUCT_TABLE.";";
         return self::execute($query, "PRODUCT");
+    }
+
+    public static function stockByIdAndCity($product_id,$city=null){
+        return self::searchProducts(null,null,null,null,$city,$product_id);
+    }
+
+    public static function searchProducts($max_price= null,$name_search = null,$food_type= null,$max_mass = null,$location = null,$prod_id = null) {
+    
+
+         $query ="SELECT P.PROD_ID, P.PROD_NAME,P.PROD_MASS, V.VEND_NAME, P.PROD_NETPR, P.FOOD_CAT, P.FOOD_IMG, S.STOCK_QTY, S.CITY_NAME
+                    FROM ".ProductDao::$STOCK_TABLE." AS S
+                    RIGHT OUTER JOIN ".ProductDao::$PRODUCT_TABLE." AS P ON S.PROD_ID = P.PROD_ID
+                    RIGHT OUTER JOIN ".ProductDao::$VENDOR." AS V ON P.VEND_ID = V.VEND_ID
+                    WHERE P.PROD_NAME LIKE '%".$name_search."%'";
+        
+        if(!empty($max_price)){
+            $query = $query."AND P.PROD_NETPR<=".$max_price."";
+        }
+        if(!empty($food_type)){
+            $query = $query."AND P.FOOD_CAT='".$food_type."'";
+        }
+        if(!empty($max_mass)){
+            $query = $query."AND P.PROD_MASS<=".$max_mass."";
+        }
+        if(!empty($location)){
+            $query = $query."AND S.CITY_NAME='".$location."'";
+        }
+        if(!empty($prod_id)){
+            $query = $query."AND P.PROD_ID='".$prod_id."'";
+        }
+        $query = $query.";";
+        return self::execute($query, "FINAL_PRODUCT");
+    }
+
+}
+
+class FoodGroupDao extends DBHelper {
+    public static $TABLE = "FOOD_GROUP";
+    public static function listAllFoodGroups() {
+    
+        $query = "SELECT * FROM ".FoodGroupDao::$TABLE.";";
+      
+        return self::execute($query, "FOOD_GROUP");
     }
 }
 
-echo json_encode(ProductDao::listAllProducts());
+//echo json_encode(array_merge(['PRODUCTS' => ProductDao::allProducts()]));
+//echo json_encode(array_merge(['PRODUCTS' => ProductDao::stock(4)]));
+//echo json_encode(array_merge( ProductDao::searchProducts($_GET["max_price"],$_GET["name"],$_GET["category"],$_GET["max_mass"],$_GET["city"])));
+
+
+
+if(isset($_GET["resources"])){
+
+    if($_GET["resources"] == "products"){
+        if($_GET["action"] == "all"){
+            echo json_encode(array_merge(['data' => ProductDao::allProducts()]));
+            die();
+        }
+        elseif ($_GET["action"] == "stock") {
+            echo json_encode(array_merge(['data' => ProductDao::stockByIdAndCity($_GET["prod_id"],$_GET["city"])]));
+            die();
+        }
+        elseif ($_GET["action"] == "search") {
+            echo json_encode(array_merge(['data' => ProductDao::searchProducts($_GET["max_price"],$_GET["name"],$_GET["category"],$_GET["max_mass"],$_GET["city"])]));
+            die();
+        }else{
+            echoJsonError(new Exception('no action selected', 400));
+        }
+    }else{
+        echoJsonError(new Exception('this resource doesnt exist', 404));
+    }
+
+ 
+    
+   
+
+
+}

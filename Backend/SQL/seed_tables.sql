@@ -17,12 +17,12 @@ INSERT INTO `foodtastic`.`SALES_CITY` (`CITY_NAME`) VALUES ('Montreal');
 INSERT INTO `foodtastic`.`SALES_CITY` (`CITY_NAME`) VALUES ('Berlin');
 INSERT INTO `foodtastic`.`SALES_CITY` (`CITY_NAME`) VALUES ('Rome');
 
-INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('1', 'Sorted Apples 200g', '1', '3.12', 'Fruits','http://10.0.0.10/.images/apples.webp');
-INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('2', 'Veggies Pack 50g', '2', '2.10', 'Vegetables','http://10.0.0.10/.images/veggies.jpg');
-INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('3', 'Sausages 30g', '3', '1.10', 'Meat','http://10.0.0.10/.images/sossisdoux.jpg');
-INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('4', 'Shrimps 50g', '2', '5.14', 'Seafood','http://10.0.0.10/.images/shrimps.jpg');
-INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('5', 'Cheese 40g', '3', '1.16', 'Dairy','http://10.0.0.10/.images/fromazkraff.jpg');
-INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('6', 'Green Peas 60g', '1', '2.10', 'Grains','http://10.0.0.10/.images/greenpeas.jpg');
+INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('1', 'Sorted Apples','200', '1', '3.12', 'Fruits','http://10.0.0.10/.images/apples.webp');
+INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('2', 'Veggies Pack','40', '2', '2.10', 'Vegetables','http://10.0.0.10/.images/veggies.jpg');
+INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('3', 'Sausages','50', '3', '1.10', 'Meat','http://10.0.0.10/.images/sossisdoux.jpg');
+INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('4', 'Shrimps','90','2', '5.14', 'Seafood','http://10.0.0.10/.images/shrimps.jpg');
+INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('5', 'Cheese','30','1', '1.16', 'Dairy','http://10.0.0.10/.images/fromazkraff.jpg');
+INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('6', 'Green Peas ','70','1', '2.10', 'Grains','http://10.0.0.10/.images/greenpeas.jpg');
 
 
 INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('1', '10', 'Montreal');

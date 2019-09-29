@@ -69,6 +69,7 @@ CREATE TABLE `foodtastic`.`PRODUCT`
 (
  `PROD_ID`    int NOT NULL AUTO_INCREMENT ,
  `PROD_NAME`  varchar(50) NOT NULL ,
+ `PROD_MASS`  int NOT NULL,
  `VEND_ID`    int NOT NULL ,
  `PROD_NETPR` decimal(12,2) NOT NULL ,
  `FOOD_CAT`   varchar(45) NULL ,
