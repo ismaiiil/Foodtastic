@@ -11,10 +11,7 @@ Vagrant.configure("2") do |config|
     web.vm.box = "brownell/xenial64lemp"
     web.vm.network :private_network, ip: "10.0.0.10"
     web.vm.network "forwarded_port", guest: 3306, host: 3306, protocol: "tcp"
-  update = <<'SCRIPT'
-# update system before we install anything
-sudo apt-get update && sudo apt-get -y upgrade 
-SCRIPT
+
 
   setup_sql = <<'SCRIPT'
 #wait for myql to start up
@@ -48,6 +45,11 @@ SCRIPT
 #copy images to destination folder
 sudo cp -a /vagrant/tobecopied/seedimages/. /vagrant/Backend/.images
 
+SCRIPT
+
+update = <<'SCRIPT'
+# update system before we install anything
+sudo apt-get update && sudo apt-get -y upgrade 
 SCRIPT
 
   script = ''
