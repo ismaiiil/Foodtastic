@@ -1,5 +1,16 @@
 <?php
 header("Access-Control-Allow-Origin: *");
+
+if($_SERVER["REQUEST_METHOD"] == "OPTIONS")
+{
+    if (isset($_SERVER["HTTP_ACCESS_CONTROL_REQUEST_METHOD"]))
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT");
+
+    if (isset($_SERVER["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"]))
+        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+
+}
+
 @session_start();
 
 function echoJsonError($e){
@@ -207,6 +218,7 @@ class SO_HEADER{
     public $CUST_UNAME;
     public $SO_DATE;
     public $SO_TOTAL;
+    public function __construct(){ }
 }
 
 class SO_LINE{
@@ -215,11 +227,17 @@ class SO_LINE{
     public $SO_LINE_NETPR;
     public $SO_LINE_QTY;
     public $CITY_NAME;
+    public function __construct(){ }
 }
 
 class STOCK{
     public $PROD_ID;
     public $STOCK_QTY;
+    public $CITY_NAME;
+    public function __construct(){}
+}
+
+class SALES_CITY{
     public $CITY_NAME;
     public function __construct(){}
 }
@@ -301,6 +319,16 @@ class ProductDao extends BaseDB {
          )));
     }
 
+    public static function updateStock($product_id,$city,$stock){
+        $query = "UPDATE ".ProductDao::$STOCK_TABLE." SET STOCK_QTY = :STOCK_QTY WHERE PROD_ID = :PROD_ID AND CITY_NAME = :CITY_NAME";
+        self::first_one(self::execute($query, "STOCK", array(
+            'STOCK_QTY' => $stock,
+            'PROD_ID' => $product_id,
+            'CITY_NAME' => $city
+         )));
+    }
+
+
     public static function searchProducts($max_price= null,$name_search = null,$food_type= null,$max_mass = null,$location = null,$prod_id = null) {
     
 
@@ -334,10 +362,33 @@ class ProductDao extends BaseDB {
 class FoodGroupDao extends BaseDB {
     public static $TABLE = "FOOD_GROUP";
     public static function listAllFoodGroups() {
-    
         $query = "SELECT * FROM ".FoodGroupDao::$TABLE.";";
-      
         return self::execute($query, "FOOD_GROUP");
+    }
+}
+
+class SalesCityDao extends BaseDB {
+    public static $TABLE = "SALES_CITY";
+    public static function listAllCities() {
+        $query = "SELECT * FROM ".SalesCityDao::$TABLE.";";
+        return self::execute($query, "SALES_CITY");
+    }
+
+    public static function insertCity($city){
+        $query = "INSERT INTO ".SalesCityDao::$TABLE.".`SALES_CITY` (`CITY_NAME`) VALUES (':CITY_NAME');";
+            $params = array(
+                'CITY_NAME' => $city,
+              );
+        self::beginTransaction();
+        try{
+            self::exec($query, $params);
+            self::commit();
+        }
+        catch (PDOException $ex) {
+            self::rollBack();
+            return false;
+        }
+        return $city;
     }
 }
 
@@ -409,7 +460,11 @@ class SalesDao extends BaseDB{
           $final_header->SO_TOTAL= $so_header->SO_TOTAL;
           //echo "TOTAL BEFORE SAVING::".$final_header->SO_TOTAL;
           //echo "PURCHASE NUMBER IS::".$final_header->SO_NUM;
+
           self::save_header($final_header);
+
+          
+
           return $so_line;
     }
 
@@ -431,6 +486,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     //echo json_encode($data);
 
     if(isset($_SESSION['customer'])){
+        $_SESSION['customer'] = CustomerDao::getByUsername($_SESSION['customer']->CUST_UNAME);
+        if($_SESSION['customer']->CUST_IS_BLOCKED == '1'){
+            echoJsonError(new Exception('Your account has been block and cannot checkout, please contact support!', 401));
+        }
+    }
+
+    if(isset($_SESSION['customer'])){
     //json should look like this:
     //{"resources":"sales","products":[{"prod_id":"2", "quantity":"3", "city":"Paris"},{"prod_id":"4", "quantity":"2", "city":"Berlin"}] }
         if($data->resources == "sales"){
@@ -446,23 +508,24 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             foreach ($data->products as $key => $value ) {
 
                 //check stock availability
-                $stock = ProductDao::singleStockByIdAndCity($value->prod_id, $value->city);
+                $stock = ProductDao::singleStockByIdAndCity($value->PROD_ID, $value->CITY_NAME);
                 //echo json_encode($value->prod_id);
                 
-                if(isset($stock) && $stock->STOCK_QTY > $value->quantity){
+                if(isset($stock) && $stock->STOCK_QTY >= $value->BUY_QUANTITY){
                     $so_line = new SO_LINE();
                     $so_line->SO_NUM = $so_header->SO_NUM ;
-                    $so_line->PROD_ID = $value->prod_id;
-                    $so_line->SO_LINE_NETPR = ProductDao::productByID($value->prod_id)->PROD_NETPR ;
-                    $so_line->SO_LINE_QTY = $value->quantity;
-                    $so_line->CITY_NAME = $value->city;
+                    $so_line->PROD_ID = $value->PROD_ID;
+                    $so_line->SO_LINE_NETPR = ProductDao::productByID($value->PROD_ID)->PROD_NETPR ;
+                    $so_line->SO_LINE_QTY = $value->BUY_QUANTITY;
+                    $so_line->CITY_NAME = $value->CITY_NAME;
                     array_push($final_lines,SalesDao::create_line($so_line));
+                    //update stock
+                    ProductDao::updateStock($so_line->PROD_ID,$so_line->CITY_NAME,($stock->STOCK_QTY)-($so_line->SO_LINE_QTY));
                 }else{
-                    $ERROR["error"] = "Not enough of ".$value->prod_id." in".$value->city."to be added to the purchase";
+                    $ERROR["error"] = "Not enough of item id: ".$value->PROD_ID." in".$value->CITY_NAME."to be added to the purchase";
                     array_push($final_lines,$ERROR);
                 }
-                //update stock
-                //add line
+                
                 
             }
 
@@ -471,13 +534,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         }
         die();
     }else{
-        echoJsonError(new Exception('Unathorized access, please login', 401) );
+        echoJsonError(new Exception('Unathorized access, please login', 401));
     }
 
     
 }
 
 if(isset($_GET["resources"])){
+
 
     if($_GET["resources"] == "products"){
         if($_GET["action"] == "all"){
@@ -491,10 +555,27 @@ if(isset($_GET["resources"])){
         elseif ($_GET["action"] == "search") {
             echo json_encode(array_merge(['data' => ProductDao::searchProducts($_GET["max_price"],$_GET["name"],$_GET["category"],$_GET["max_mass"],$_GET["city"])]));
             die();
-        }else{
+        }elseif ($_GET["action"] == "listfilters") {
+            echo json_encode(array_merge( [ 'food_group'=>FoodGroupDao::listAllFoodGroups(),'sales_city'=> SalesCityDao::listAllCities() ] ));
+        }
+        else{
             echoJsonError(new Exception('no action selected or doesnt exist', 400));
         }
     }elseif($_GET["resources"] == "customer"){
+       
+        if(isset($_SESSION['customer'])){
+            $_SESSION['customer'] = CustomerDao::getByUsername($_SESSION['customer']->CUST_UNAME);
+            if($_SESSION['customer']->CUST_IS_ADMIN == '1'){
+                if($_GET["action"] == "make_admin"){
+                    if($GET_["username"]){
+                        //update user and set CUST_IS_ADMIN = '1';
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+                }
+            }
+        }
+
         if($_GET["action"] == "register"){
             if($_GET["username"] && $_GET["firstname"] && $_GET["lastname"] && $_GET["password"] && $_GET["address"] && $_GET["city"] 
             && $_GET["zip"]){

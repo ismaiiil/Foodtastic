@@ -25,11 +25,11 @@ INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID
 INSERT INTO `foodtastic`.`PRODUCT` (`PROD_ID`, `PROD_NAME`,`PROD_MASS`, `VEND_ID`, `PROD_NETPR`, `FOOD_CAT`, `FOOD_IMG`) VALUES ('6', 'Green Peas ','70','1', '2.10', 'Grains','http://10.0.0.10/.images/greenpeas.jpg');
 
 
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('1', '10', 'Montreal');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('2', '10', 'Paris');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('3', '4', 'Berlin');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('4', '7', 'Rome');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('5', '7', 'Marseille');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('6', '5', 'Paris');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('5', '4', 'Paris');
-INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('4', '3', 'Paris');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('1', '99', 'Montreal');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('2', '95', 'Paris');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('3', '94', 'Berlin');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('4', '97', 'Rome');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('5', '92', 'Marseille');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('6', '90', 'Paris');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('5', '95', 'Paris');
+INSERT INTO `foodtastic`.`STOCK` (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES ('4', '94', 'Paris');
