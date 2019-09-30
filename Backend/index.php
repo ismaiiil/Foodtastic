@@ -217,6 +217,13 @@ class SO_LINE{
     public $CITY_NAME;
 }
 
+class STOCK{
+    public $PROD_ID;
+    public $STOCK_QTY;
+    public $CITY_NAME;
+    public function __construct(){}
+}
+
 class CustomerDao extends BaseDB {
     public static $TABLE = "CUSTOMER";
 
@@ -286,6 +293,14 @@ class ProductDao extends BaseDB {
          )));
     }
 
+    public static function singleStockByIdAndCity($product_id,$city){
+        $query = "SELECT * FROM ".ProductDao::$STOCK_TABLE." WHERE PROD_ID = :PROD_ID AND CITY_NAME = :CITY_NAME  ";
+        return self::first_one(self::execute($query, "STOCK", array(
+            'PROD_ID' => $product_id,
+            'CITY_NAME' => $city
+         )));
+    }
+
     public static function searchProducts($max_price= null,$name_search = null,$food_type= null,$max_mass = null,$location = null,$prod_id = null) {
     
 
@@ -331,15 +346,24 @@ class SalesDao extends BaseDB{
     public static $SO_LINE_TABLE = "SO_LINE";
     public static function save_header(SO_HEADER $so_header) {
         
-        $query = "INSERT INTO ".SalesDao::$SO_HEADER_TABLE." ( `SO_NUM`, `CUST_UNAME`, `SO_TOTAL`)
-        VALUES ( :CUST_UNAME, :SO_TOTAL)
-        ON DUPLICATE KEY UPDATE SO_TOTAL = :SO_TOTAL;";
+        if (is_null($so_header->SO_NUM)){
+            $query = "INSERT INTO ".SalesDao::$SO_HEADER_TABLE." ( `CUST_UNAME`, `SO_TOTAL`)
+            VALUES ( :CUST_UNAME, :SO_TOTAL)";
+            $params = array(
+                'CUST_UNAME' => $so_header->CUST_UNAME, 
+                'SO_TOTAL' => $so_header->SO_TOTAL
+              );
+        }else{
+            $query = "INSERT INTO ".SalesDao::$SO_HEADER_TABLE." ( `SO_NUM`,`CUST_UNAME`, `SO_TOTAL`)
+            VALUES ( :SO_NUM, :CUST_UNAME, :SO_TOTAL)
+            ON DUPLICATE KEY UPDATE SO_TOTAL = :SO_TOTAL;";
+            $params = array(
+                'SO_NUM' => $so_header->SO_NUM,
+                'CUST_UNAME' => $so_header->CUST_UNAME, 
+                'SO_TOTAL' => $so_header->SO_TOTAL
+              );
+        }
 
-        $params = array(
-            'SO_NUM' =>  $so_header->SO_NUM,
-            'CUST_UNAME' => $so_header->CUST_UNAME, 
-            'SO_TOTAL' => $so_header->SO_TOTAL
-          );
           self::beginTransaction();
           try{
               self::exec($query, $params);
@@ -355,7 +379,7 @@ class SalesDao extends BaseDB{
     }
 
     public static function create_line(SO_LINE $so_line){
-        $query = "INSERT INTO ".SalesDao::$SO_LINE_TABLE." (  `SO_NUM`, `PROD_ID`, `SO_LINE_NETPR`, `SO_LINE_QTY` ,`CITY_NAME`     varchar(45) NOT NULL,)
+        $query = "INSERT INTO ".SalesDao::$SO_LINE_TABLE." (  `SO_NUM`, `PROD_ID`, `SO_LINE_NETPR`, `SO_LINE_QTY` ,`CITY_NAME`)
         VALUES (:SO_NUM, :PROD_ID, :SO_LINE_NETPR, :SO_LINE_QTY , :CITY_NAME );";
         $params = array(
             'SO_NUM' => $so_line->SO_NUM, 
@@ -377,11 +401,14 @@ class SalesDao extends BaseDB{
           $so_header = SalesDao::find_header($so_line->SO_NUM);
           //echo ("THE SO HEADER FOUND WAS:".json_encode($so_header));
           $so_header->SO_TOTAL = $so_header->SO_TOTAL + ($so_line->SO_LINE_NETPR * $so_line->SO_LINE_QTY);
+          //echo "TOTAL calculater IS::".$so_header->SO_TOTAL;
           $final_header = new SO_HEADER();
           $final_header->SO_NUM = $so_header->SO_NUM;
           $final_header->CUST_UNAME= $so_header->CUST_UNAME;
           $final_header->SO_DATE= $so_header->SO_DATE;
           $final_header->SO_TOTAL= $so_header->SO_TOTAL;
+          //echo "TOTAL BEFORE SAVING::".$final_header->SO_TOTAL;
+          //echo "PURCHASE NUMBER IS::".$final_header->SO_NUM;
           self::save_header($final_header);
           return $so_line;
     }
@@ -401,36 +428,46 @@ class SalesDao extends BaseDB{
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $data = json_decode(file_get_contents('php://input'));
-    echo json_encode($data);
+    //echo json_encode($data);
 
     if(isset($_SESSION['customer'])){
-        //json should look like this:
-    //{"resources":"sales","","products":[{"prod_id":"4", "quantity":"2", "city":"Paris"},{"prod_id":"4", "quantity":"2", "city":"Paris"}] }
+    //json should look like this:
+    //{"resources":"sales","products":[{"prod_id":"2", "quantity":"3", "city":"Paris"},{"prod_id":"4", "quantity":"2", "city":"Berlin"}] }
         if($data->resources == "sales"){
             //create header
             $so_header = new SO_HEADER();
+            $so_header->SO_NUM = null;
             $so_header->CUST_UNAME = $_SESSION['customer']->CUST_UNAME;
             $so_header->SO_TOTAL = 0;
             $so_header = SalesDao::save_header($so_header);
+            //echo json_encode($so_header);
             //then add lines to it
-            foreach ($data->products as $line) {
+            $final_lines = [];
+            foreach ($data->products as $key => $value ) {
+
                 //check stock availability
-                $stock = ProductDao::stockByIdAndCity($line->prod_id, $line->city);
-                if($stock[0]->STOCK_QTY > $line->quantity){
+                $stock = ProductDao::singleStockByIdAndCity($value->prod_id, $value->city);
+                //echo json_encode($value->prod_id);
+                
+                if(isset($stock) && $stock->STOCK_QTY > $value->quantity){
                     $so_line = new SO_LINE();
                     $so_line->SO_NUM = $so_header->SO_NUM ;
-                    $so_line->PROD_ID = $line->prod_id;
-                    $so_line->SO_LINE_NETPR = ProductDao::productByID($line->prod_id)->PROD_NETPR ;
-                    $so_line->SO_LINE_QTY = $line->quantity;
-                    $so_line->CITY_NAME = $line->city;
-                    echo json_encode(SalesDao::create_line($so_line));
+                    $so_line->PROD_ID = $value->prod_id;
+                    $so_line->SO_LINE_NETPR = ProductDao::productByID($value->prod_id)->PROD_NETPR ;
+                    $so_line->SO_LINE_QTY = $value->quantity;
+                    $so_line->CITY_NAME = $value->city;
+                    array_push($final_lines,SalesDao::create_line($so_line));
+                }else{
+                    $ERROR["error"] = "Not enough of ".$value->prod_id." in".$value->city."to be added to the purchase";
+                    array_push($final_lines,$ERROR);
                 }
                 //update stock
                 //add line
-                echo $line->prod_id;
-                echo $line->quantity;
-                echo $line->city;
+                
             }
+
+            $so_header = SalesDao::find_header($so_header->SO_NUM);
+            echo json_encode(array_merge(['SO_HEADER' => $so_header, 'SO_LINE' => $final_lines]));
         }
         die();
     }else{
