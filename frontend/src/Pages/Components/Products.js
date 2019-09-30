@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import axios from "axios";
 import Button from "@material-ui/core/Button";
+import { withRouter } from "react-router-dom";
 
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -62,8 +63,16 @@ const Products = props => {
   const [url, setUrl] = React.useState(
     "http://10.0.0.10/?resources=products&action=all"
   );
+  const [card, setCard] = React.useState(null);
   const setCartItems = useStoreActions(actions => actions.cart.setCartItems);
-
+  const handleView = card => {
+    setCard(card);
+    console.log(card);
+    props.history.push({
+      pathname: "/viewProduct",
+      state: card
+    });
+  };
   const handleAddToCart = card => {
     setCartItems(card);
   };
@@ -161,7 +170,11 @@ const Products = props => {
                       flexDirection="row"
                       className={classes.cardActions}
                     >
-                      <Button size="small" color="primary">
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => handleView(card)}
+                      >
                         View
                       </Button>
                       <Button
@@ -189,4 +202,4 @@ const Products = props => {
   }
 };
 
-export default Products;
+export default withRouter(Products);

@@ -12,6 +12,7 @@ import Cart from "./Pages/Cart/cart";
 import Profile from "./Pages/User/Profile";
 import SearchResults from "./Pages/Search";
 import NotFoundPage from "./Pages/Errors/NotFound";
+import ViewProduct from "./Pages/ViewProduct";
 
 function App() {
   const isLogged = useStoreState(state => state.user.isLogged);
@@ -34,7 +35,11 @@ function App() {
               exact
               render={props => <Cart {...props} displayTitle={true} />}
             />
-
+            <Route
+              path="/viewProduct"
+              exact
+              render={props => <ViewProduct {...props} />}
+            />
             <Route path="/signup" component={SignUp}></Route>
             {user.isAdmin === "1" ? (
               <React.Fragment>

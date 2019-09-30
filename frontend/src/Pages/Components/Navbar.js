@@ -159,8 +159,6 @@ const Navbar = props => {
     }
   };
 
-  console.log(values.filter);
-
   const handleChange = event => {
     setValues(oldValues => ({
       ...oldValues,
