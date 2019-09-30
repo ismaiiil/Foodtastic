@@ -22,10 +22,12 @@ function App() {
         <Navbar>
           <Switch>
             <Route exact path="/" component={Home} />
-            {isLogged ? null : (
+            {isLogged ? (
+              <Route path="/profile" component={Profile}></Route>
+            ) : (
               <Route path="/signin" component={SignIn}></Route>
             )}
-            <Route path="/profile" component={Profile}></Route>
+
             <Route path="/searchresults" component={SearchResults}></Route>
             <Route
               path="/cart"
