@@ -16,7 +16,7 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { Box, CircularProgress } from "@material-ui/core";
-import { useStoreActions } from "easy-peasy";
+import { useStoreActions, useStoreState } from "easy-peasy";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -65,6 +65,8 @@ const Products = props => {
   );
   const [card, setCard] = React.useState(null);
   const setCartItems = useStoreActions(actions => actions.cart.setCartItems);
+  const cartItems = useStoreState(state => state.cart.cartItems);
+
   const handleView = card => {
     setCard(card);
     console.log(card);
@@ -75,6 +77,7 @@ const Products = props => {
   };
   const handleAddToCart = card => {
     setCartItems(card);
+    console.log(cartItems);
   };
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -105,7 +108,7 @@ const Products = props => {
         setUrl("http://10.0.0.10/?resources=products&action=search&city=Rome");
         break;
       default:
-        setUrl("http://10.0.0.10/?resources=products&action=all");
+        setUrl("http://10.0.0.10/?resources=products&action=search");
         break;
     }
   };

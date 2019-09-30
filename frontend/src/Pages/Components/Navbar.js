@@ -174,6 +174,20 @@ const Navbar = props => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+  const handleSubmit = () => {
+    let post = { resources: "sales", products: cartItems };
+    const bodyFormData = new FormData();
+    bodyFormData.append(post);
+    axios
+      .post("http://10.0.0.10/", { resources: "sales", products: cartItems })
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   return (
     <div className={classes.root}>
       <CssBaseline />

@@ -12,7 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Divider from "@material-ui/core/Divider";
 import { useStoreState, useStoreActions } from "easy-peasy";
-
+import axios from "axios";
 const useStyles = makeStyles(theme => ({
   cart: {
     padding: theme.spacing(2)
@@ -34,6 +34,17 @@ const Cart = props => {
     console.log("Clicked");
     removeCartItemAtIndex(event.target.id);
     console.log(event.target.id);
+  };
+  const handleSubmit = () => {
+    let post = { resources: "sales", products: cartItems };
+    axios
+      .post("http://10.0.0.10/", { post })
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const classes = useStyles();
@@ -110,6 +121,9 @@ const Cart = props => {
             variant="contained"
             color="primary"
             className={classes.checkoutBtn}
+            onClick={() => {
+              handleSubmit();
+            }}
           >
             Checkout
           </Button>
