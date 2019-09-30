@@ -30,6 +30,10 @@ export const useStyles = makeStyles(theme => ({
       duration: theme.transitions.duration.enteringScreen
     })
   },
+  link: {
+    color: "white",
+    textDecoration: "none"
+  },
   menuButton: {
     marginRight: 36
   },
@@ -65,6 +69,26 @@ export const useStyles = makeStyles(theme => ({
     height: "100vh",
     overflow: "auto"
   },
+  formControl: {
+    color: "white",
+    padding: 0,
+    width: "200px",
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    "&:hover": {
+      backgroundColor: fade(theme.palette.common.white, 0.25)
+    },
+    marginLeft: theme.spacing(2),
+    height: "50px"
+  },
+  whiteText: {
+    color: "white"
+  },
+  selection: {
+    color: "white",
+    padding: "0px !important",
+    height: "50px"
+  },
+
   container: {
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4)

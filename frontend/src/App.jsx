@@ -9,11 +9,13 @@ import Navbar from "./Pages/Components/Navbar";
 import ManageUsers from "./Pages/Admin/Users";
 import ManageProducts from "./Pages/Admin/Products";
 import Cart from "./Pages/Cart/cart";
+import Profile from "./Pages/User/Profile";
+import SearchResults from "./Pages/Search";
+import NotFoundPage from "./Pages/Errors/NotFound";
 
 function App() {
   const isLogged = useStoreState(state => state.user.isLogged);
   const user = useStoreState(state => state.user.user);
-  console.log(user);
   return (
     <Router>
       <div className="App">
@@ -23,10 +25,16 @@ function App() {
             {isLogged ? null : (
               <Route path="/signin" component={SignIn}></Route>
             )}
+            <Route path="/profile" component={Profile}></Route>
+            <Route path="/searchresults" component={SearchResults}></Route>
+            <Route
+              path="/cart"
+              exact
+              render={props => <Cart {...props} displayTitle={true} />}
+            />
 
             <Route path="/signup" component={SignUp}></Route>
-            {console.log(user.isAdmin + "icic sa")}
-            {user.isAdmin === 1 ? (
+            {user.isAdmin === "1" ? (
               <React.Fragment>
                 <Route path="/manageusers" component={ManageUsers}></Route>
                 <Route
@@ -35,11 +43,7 @@ function App() {
                 ></Route>
               </React.Fragment>
             ) : null}
-
-            <Route
-              path="/cart"
-              component={() => <Cart displayTitle={true} />}
-            ></Route>
+            <Route path="*" component={NotFoundPage} />
           </Switch>
         </Navbar>
       </div>
