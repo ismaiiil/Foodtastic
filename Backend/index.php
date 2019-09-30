@@ -11,27 +11,27 @@ function echoJsonError($e){
     die();
 }
 
-abstract class DBHelper {
+abstract class BaseDB {
     
     
     private static $PDOInstance = null;
 
-    const DEFAULT_SQL_TYPE = "mysql";
+    const SQL_TYPE = "mysql";
   
-    const DEFAULT_SQL_USER = "foodtastic";
+    const DB_USER = "foodtastic";
 
-    const DEFAULT_SQL_HOST = "127.0.0.1";
+    const DB_HOST = "127.0.0.1";
 
-    const DEFAULT_SQL_PASS = "foodtastic";
+    const DB_PASSWORD = "foodtastic";
 
-    const DEFAULT_SQL_DTB = "foodtastic";
+    const DB_SCHEMA = "foodtastic";
 
 
     
     public static function getInstance() {
         if(is_null(self::$PDOInstance)) {
             try{
-                self::$PDOInstance = new PDO(self::DEFAULT_SQL_TYPE.':dbname='.self::DEFAULT_SQL_DTB.';host='.self::DEFAULT_SQL_HOST,self::DEFAULT_SQL_USER ,self::DEFAULT_SQL_PASS,
+                self::$PDOInstance = new PDO(self::SQL_TYPE.':dbname='.self::DB_SCHEMA.';host='.self::DB_HOST,self::DB_USER ,self::DB_PASSWORD,
                         array(
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
             ));
@@ -39,6 +39,7 @@ abstract class DBHelper {
             catch (Exception $e) {
                 echoJsonError($e);
             }
+            
         }
         return self::$PDOInstance;
     }
@@ -60,7 +61,6 @@ abstract class DBHelper {
                 $request->bindValue(':'.$key, $value);
             }
         }
-        //echo json_encode($request);
         $request->execute();
         $result = null;
         if($fetch) {
@@ -68,18 +68,7 @@ abstract class DBHelper {
         }
         return $result;
     }
-  
-    public static function execAssoc($query, $params = null) {
-        $request = self::getInstance()->prepare($query);
-        if(is_array($params)) {
-            foreach ($params as $key => $value) {
-                $request->bindValue(':'.$key, $value);
-            }
-        }
-        $request->execute();
-        $result = $request>fetchAll(PDO::FETCH_ASSOC);
-        return $result;
-  }
+
     
     public static function execute($query, $objectType, $params = NULL) {
         if (!empty($query) && is_string($query) && !empty($objectType) && is_string($objectType)) {
@@ -134,7 +123,7 @@ abstract class DBHelper {
         }
     }
     
-    public static function justOne($array){
+    public static function first_one($array){
         if(is_array($array) && isset($array[0])){
             return $array[0];
         }
@@ -168,22 +157,6 @@ abstract class DBHelper {
         return self::getInstance()->lastInsertId();
     }  
     
-    public static function delete($table){
-        if (!empty($table)) {
-        $query   = "DELETE FROM TABLE ".$table." ;";
-        $request = self::getInstance()->prepare($query);
-        return $request->execute();
-    }
-    return FALSE;
-    }
-    
-    public static function resetAI($table){
-        $query = "ALTER TABLE ".$table." AUTO_INCREMENT = 1";
-        $request = self::getInstance()->prepare($query);
-        return $request->execute();
-    }
-    
-   
 }
 
 class FINAL_PRODUCT {
@@ -243,7 +216,7 @@ class SO_LINE{
     public $CITY_NAME;
 }
 
-class CustomerDao extends DBHelper {
+class CustomerDao extends BaseDB {
     public static $TABLE = "CUSTOMER";
 
     public static function save(CUSTOMER $customer){
@@ -277,12 +250,12 @@ class CustomerDao extends DBHelper {
 
     public static function getByUsername($username) {
         $query = "SELECT * FROM ".CustomerDao::$TABLE." WHERE CUST_UNAME = :CUST_UNAME";
-        return self::justOne(self::execute($query, "CUSTOMER", array('CUST_UNAME' => $username)));
+        return self::first_one(self::execute($query, "CUSTOMER", array('CUST_UNAME' => $username)));
     }
 
     public static function checkUsernameAndPwd($username,$password){
         $query = "SELECT * FROM ".CustomerDao::$TABLE." WHERE CUST_UNAME = :username AND CUST_PWD = :password";
-        return self::justOne(self::execute($query, "CUSTOMER", array(
+        return self::first_one(self::execute($query, "CUSTOMER", array(
             'username' => $username,
             'password' => sha1($password)
          )));
@@ -290,7 +263,7 @@ class CustomerDao extends DBHelper {
 
 }
 
-class ProductDao extends DBHelper {
+class ProductDao extends BaseDB {
     public static $PRODUCT_TABLE = "PRODUCT";
     public static $STOCK_TABLE = "STOCK";
     public static $VENDOR_TABLE = "VENDOR";
@@ -303,6 +276,13 @@ class ProductDao extends DBHelper {
 
     public static function stockByIdAndCity($product_id,$city=null){
         return self::searchProducts(null,null,null,null,$city,$product_id);
+    }
+
+    public static function productByID($product_id){
+        $query = "SELECT * FROM ".ProductDao::$PRODUCT_TABLE." WHERE PROD_ID = :PROD_ID;";
+        return self::first_one(self::execute($query, "PRODUCT", array(
+            'PROD_ID' => $product_id
+         )));
     }
 
     public static function searchProducts($max_price= null,$name_search = null,$food_type= null,$max_mass = null,$location = null,$prod_id = null) {
@@ -335,7 +315,7 @@ class ProductDao extends DBHelper {
 
 }
 
-class FoodGroupDao extends DBHelper {
+class FoodGroupDao extends BaseDB {
     public static $TABLE = "FOOD_GROUP";
     public static function listAllFoodGroups() {
     
@@ -345,24 +325,24 @@ class FoodGroupDao extends DBHelper {
     }
 }
 
-class SalesDao extends DBhelper{
+class SalesDao extends BaseDB{
     public static $SO_HEADER_TABLE = "SO_HEADER";
     public static $SO_LINE_TABLE = "SO_LINE";
     public static function save_header(SO_HEADER $so_header) {
         
-        $query = "INSERT INTO ".SalesDao::$SO_HEADER_TABLE." ( `SO_NUM` , `CUST_UNAME`, `SO_DATE`, `SO_TOTAL`)
-        VALUES (:SO_NUM, :CUST_UNAME, :SO_DATE, :SO_TOTAL)
+        $query = "INSERT INTO ".SalesDao::$SO_HEADER_TABLE." ( `SO_NUM`, `CUST_UNAME`, `SO_TOTAL`)
+        VALUES ( :CUST_UNAME, :SO_TOTAL)
         ON DUPLICATE KEY UPDATE SO_TOTAL = :SO_TOTAL;";
 
         $params = array(
-            'SO_NUM' => $so_header->CUST_UNAME, 
-            'CUST_UNAME' => $so_header->CUST_FNAME, 
-            'SO_DATE' => $so_header->CUST_LNAME, 
-            'SO_TOTAL' => $so_header->CUST_PWD
+            'SO_NUM' =>  $so_header->SO_NUM,
+            'CUST_UNAME' => $so_header->CUST_UNAME, 
+            'SO_TOTAL' => $so_header->SO_TOTAL
           );
           self::beginTransaction();
           try{
               self::exec($query, $params);
+              $so_header->SO_NUM = self::getLastInsertId();
               self::commit();
               
           }
@@ -393,15 +373,21 @@ class SalesDao extends DBhelper{
               self::rollBack();
               return false;
           }
-          $so_header = self::find_header($so_line->SO_NUM);
-          $so_header->SO_TOTAL = $so_header->SO_TOTAL + ($so_line->SO_LINE_NETPR * $so_line->SO_LINE_QTY)
-          self::save_header($so_header);
+          $so_header = SalesDao::find_header($so_line->SO_NUM);
+          //echo ("THE SO HEADER FOUND WAS:".json_encode($so_header));
+          $so_header->SO_TOTAL = $so_header->SO_TOTAL + ($so_line->SO_LINE_NETPR * $so_line->SO_LINE_QTY);
+          $final_header = new SO_HEADER();
+          $final_header->SO_NUM = $so_header->SO_NUM;
+          $final_header->CUST_UNAME= $so_header->CUST_UNAME;
+          $final_header->SO_DATE= $so_header->SO_DATE;
+          $final_header->SO_TOTAL= $so_header->SO_TOTAL;
+          self::save_header($final_header);
           return $so_line;
     }
 
     public static function find_header($so_num){
         $query = "SELECT * FROM ".SalesDao::$SO_HEADER_TABLE." WHERE SO_NUM = :so_num";
-        return self::justOne(self::execute($query, "SO_HEADER", array(
+        return self::first_one(self::execute($query, "SO_HEADER", array(
             'so_num' => $so_num
          )));
     }
@@ -410,18 +396,47 @@ class SalesDao extends DBhelper{
 //echo json_encode(array_merge(['PRODUCTS' => ProductDao::stock(4)]));
 //echo json_encode(array_merge( ProductDao::searchProducts($_GET["max_price"],$_GET["name"],$_GET["category"],$_GET["max_mass"],$_GET["city"])));
 
+
+
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $data = json_decode(file_get_contents('php://input'));
     echo json_encode($data);
 
-    //json should look like this:
-    //{"resources":"sales","products":[{"prod_id":"4", "quantity":"2", "city":"Paris"},{"prod_id":"4", "quantity":"2", "city":"Paris"}] }
-    if($data->resources == "sales"){
-        foreach ($data->products as $variable) {
-            echo $variable->prod_id;
+    if(isset($_SESSION['customer'])){
+        //json should look like this:
+    //{"resources":"sales","","products":[{"prod_id":"4", "quantity":"2", "city":"Paris"},{"prod_id":"4", "quantity":"2", "city":"Paris"}] }
+        if($data->resources == "sales"){
+            //create header
+            $so_header = new SO_HEADER();
+            $so_header->CUST_UNAME = $_SESSION['customer']->CUST_UNAME;
+            $so_header->SO_TOTAL = 0;
+            $so_header = SalesDao::save_header($so_header);
+            //then add lines to it
+            foreach ($data->products as $line) {
+                //check stock availability
+                $stock = ProductDao::stockByIdAndCity($line->prod_id, $line->city);
+                if($stock[0]->STOCK_QTY > $line->quantity){
+                    $so_line = new SO_LINE();
+                    $so_line->SO_NUM = $so_header->SO_NUM ;
+                    $so_line->PROD_ID = $line->prod_id;
+                    $so_line->SO_LINE_NETPR = ProductDao::productByID($line->prod_id)->PROD_NETPR ;
+                    $so_line->SO_LINE_QTY = $line->quantity;
+                    $so_line->CITY_NAME = $line->city;
+                    echo json_encode(SalesDao::create_line($so_line));
+                }
+                //update stock
+                //add line
+                echo $line->prod_id;
+                echo $line->quantity;
+                echo $line->city;
+            }
         }
+        die();
+    }else{
+        echoJsonError(new Exception('Unathorized access, please login', 401) );
     }
-    die();
+
+    
 }
 
 if(isset($_GET["resources"])){
