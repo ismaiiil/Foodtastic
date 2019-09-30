@@ -245,6 +245,38 @@ class SALES_CITY{
 class CustomerDao extends BaseDB {
     public static $TABLE = "CUSTOMER";
 
+    public static function makeAdmin($username){
+        $query = "UPDATE ".CustomerDao::$TABLE." SET CUST_IS_ADMIN = '1' WHERE CUST_UNAME = :CUST_UNAME;";
+        self::first_one(self::execute($query, "CUSTOMER", array(
+            'CUST_UNAME' => $username
+         )));
+
+    }
+
+    public static function removeAdmin($username){
+        $query = "UPDATE ".CustomerDao::$TABLE." SET CUST_IS_ADMIN = '0' WHERE CUST_UNAME = :CUST_UNAME;";
+        self::first_one(self::execute($query, "CUSTOMER", array(
+            'CUST_UNAME' => $username
+         )));
+
+    }
+
+    public static function block($username){
+        $query = "UPDATE ".CustomerDao::$TABLE." SET CUST_IS_BLOCKED = '1' WHERE CUST_UNAME = :CUST_UNAME;";
+        self::first_one(self::execute($query, "CUSTOMER", array(
+            'CUST_UNAME' => $username
+         )));
+
+    }
+
+    public static function unblock($username){
+        $query = "UPDATE ".CustomerDao::$TABLE." SET CUST_IS_BLOCKED = '0' WHERE CUST_UNAME = :CUST_UNAME;";
+        self::first_one(self::execute($query, "CUSTOMER", array(
+            'CUST_UNAME' => $username
+         )));
+
+    }
+
     public static function save(CUSTOMER $customer){
         $query = "INSERT INTO ".CustomerDao::$TABLE." (`CUST_UNAME`,`CUST_FNAME`,`CUST_LNAME`,`CUST_PWD`,`CUST_ADDR`,`CUST_CITY`,`CUST_ZIP`,`CUST_IS_ADMIN`,`CUST_IS_BLOCKED`)
                 VALUES (:CUST_UNAME, :CUST_FNAME, :CUST_LNAME, :CUST_PWD, :CUST_ADDR, :CUST_CITY, :CUST_ZIP, :CUST_IS_ADMIN, :CUST_IS_BLOCKED)
@@ -328,6 +360,26 @@ class ProductDao extends BaseDB {
          )));
     }
 
+    public static function addNewStockToCity($product_id,$city,$stock){
+            $query = "INSERT INTO ".ProductDao::$STOCK_TABLE." (`PROD_ID`, `STOCK_QTY`, `CITY_NAME`) VALUES (:PROD_ID, :STOCK_QTY, :CITY_NAME);";
+            $params = array(
+                'PROD_ID' => $product_id, 
+                'STOCK_QTY' => $stock, 
+                'CITY_NAME' => $city
+            );
+            self::beginTransaction();
+            try{
+                self::exec($query, $params);
+                self::commit();
+
+            }
+            catch (PDOException $ex) {
+                self::rollBack();
+                return false;
+            }
+            return true;
+    }
+
 
     public static function searchProducts($max_price= null,$name_search = null,$food_type= null,$max_mass = null,$location = null,$prod_id = null) {
     
@@ -375,10 +427,10 @@ class SalesCityDao extends BaseDB {
     }
 
     public static function insertCity($city){
-        $query = "INSERT INTO ".SalesCityDao::$TABLE.".`SALES_CITY` (`CITY_NAME`) VALUES (':CITY_NAME');";
-            $params = array(
-                'CITY_NAME' => $city,
-              );
+        $query = "INSERT INTO ".SalesCityDao::$TABLE." (`CITY_NAME`) VALUES (:CITY_NAME);";
+        $params = array(
+            'CITY_NAME' => $city,
+            );
         self::beginTransaction();
         try{
             self::exec($query, $params);
@@ -566,12 +618,103 @@ if(isset($_GET["resources"])){
         if(isset($_SESSION['customer'])){
             $_SESSION['customer'] = CustomerDao::getByUsername($_SESSION['customer']->CUST_UNAME);
             if($_SESSION['customer']->CUST_IS_ADMIN == '1'){
+
                 if($_GET["action"] == "make_admin"){
-                    if($GET_["username"]){
+                    if($_GET["username"]){
                         //update user and set CUST_IS_ADMIN = '1';
+                        $user =  CustomerDao::getByUsername($_GET["username"]);
+                        if($user){
+                            CustomerDao::makeAdmin($user->CUST_UNAME);
+                            $SUCCESS['MSG'] = 'User'.$user->CUST_UNAME.' has been promoted to Admin';
+                            echo json_encode($SUCCESS);
+                            die();
+                        }else{
+                            echoJsonError(new Exception('User doesnt exist', 404));
+                        }
                     }else{
                         echoJsonError(new Exception('missing parameters', 400));
                     }
+                }elseif($_GET["action"] == "block_user"){
+                    if($_GET["username"]){
+                        //update user and set CUST_IS_BLOCKED = '1';
+                        $user =  CustomerDao::getByUsername($_GET["username"]);
+                        if($user){
+                            CustomerDao::block($user->CUST_UNAME);
+                            $SUCCESS['MSG'] = 'User'.$user->CUST_UNAME.' has been blocked';
+                            echo json_encode($SUCCESS);
+                            die();
+                        }else{
+                            echoJsonError(new Exception('User doesnt exist', 404));
+                        }
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+                }elseif($_GET["action"] == "unblock_user"){
+                    if($_GET["username"]){
+                        //update user and set CUST_IS_BLOCKED = '1';
+                        $user =  CustomerDao::getByUsername($_GET["username"]);
+                        if($user){
+                            CustomerDao::unblock($user->CUST_UNAME);
+                            $SUCCESS['MSG'] = 'User'.$user->CUST_UNAME.' has been unblocked';
+                            echo json_encode($SUCCESS);
+                            die();
+                        }else{
+                            echoJsonError(new Exception('User doesnt exist', 404));
+                        }
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+                }elseif($_GET["action"] == "remove_admin"){
+                    if($_GET["username"]){
+                        //update user and set CUST_IS_ADMIN = '0';
+                        $user =  CustomerDao::getByUsername($_GET["username"]);
+                        if($user){
+                            CustomerDao::removeAdmin($user->CUST_UNAME);
+                            $SUCCESS['MSG'] = 'User'.$user->CUST_UNAME.' has been demoted from Admin';
+                            echo json_encode($SUCCESS);
+                            die();
+                        }else{
+                            echoJsonError(new Exception('User doesnt exist', 404));
+                        }
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+                }elseif($_GET["action"] == "add_city"){
+                    if($_GET["name"]){
+                        SalesCityDao::insertCity($_GET["name"]);
+                        $SUCCESS['MSG'] = 'City '.$_GET["name"].' has been added';
+                        echo json_encode($SUCCESS);
+                        die();
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+
+                }
+                elseif($_GET["action"] == "update_stock"){
+                    if($_GET["PROD_ID"] && $_GET["STOCK_QTY"] && $_GET["CITY_NAME"]){
+                        ProductDao::updateStock($_GET["PROD_ID"],$_GET["CITY_NAME"],$_GET["STOCK_QTY"]);
+                        $SUCCESS['MSG'] = 'Stock on '.$_GET["PROD_ID"].' has been updated';
+                        echo json_encode($SUCCESS);
+                        die();
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+
+                }
+                elseif($_GET["action"] == "add_stock"){
+                    if($_GET["PROD_ID"] && $_GET["STOCK_QTY"] && $_GET["CITY_NAME"]){
+                        if(ProductDao::addNewStockToCity($_GET["PROD_ID"],$_GET["CITY_NAME"],$_GET["STOCK_QTY"])){
+                            $SUCCESS['MSG'] = 'Stock on '.$_GET["PROD_ID"].' has been updated';
+                            echo json_encode($SUCCESS);
+                            die();
+                        }else{
+                            echoJsonError(new Exception('Couldnt add stock to this city', 502));
+                        }
+                        
+                    }else{
+                        echoJsonError(new Exception('missing parameters', 400));
+                    }
+
                 }
             }
         }
