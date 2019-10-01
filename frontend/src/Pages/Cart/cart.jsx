@@ -37,8 +37,15 @@ const Cart = props => {
   };
   const handleSubmit = () => {
     let post = { resources: "sales", products: cartItems };
+    
     axios
-      .post("http://10.0.0.10/", { post })
+      .post("http://10.0.0.10/",
+      {headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      }}
+      , { post }
+      )
       .then(res => {
         console.log(res);
       })

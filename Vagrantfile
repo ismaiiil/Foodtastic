@@ -7,11 +7,6 @@
 # you're doing.
 Vagrant.configure("2") do |config|
 
-  config.vm.define "web" do |web|   
-    web.vm.box = "brownell/xenial64lemp"
-    web.vm.network :private_network, ip: "10.0.0.10"
-    web.vm.network "forwarded_port", guest: 3306, host: 3306, protocol: "tcp"
-
 
   setup_sql = <<'SCRIPT'
 #wait for myql to start up
@@ -49,13 +44,37 @@ SCRIPT
 
 update = <<'SCRIPT'
 # update system before we install anything
-sudo apt-get update && sudo apt-get -y upgrade 
+sudo systemctl disable apt-daily.service
+sudo systemctl disable apt-daily.timer
+sudo apt-get update
+sudo npm cacheclean -f
+sudo npm install n -g
+sudo n stable
+
 SCRIPT
 
+serve = <<'SCRIPT'
+cd /vagrant/frontend
+sudo npm install serve -g
+cd /vagrant/frontend && npm install
+npm run build
+serve -s build &
+SCRIPT
+
+  config.vm.define "web" do |web|   
+    web.vm.box = "brownell/xenial64lemp"
+    web.vm.network :private_network, ip: "10.0.0.10"
+    web.vm.network "forwarded_port", guest: 3306, host: 3306, protocol: "tcp"
+
+
+
   script = ''
+  
+  script += update
   script += setup_sql
   script += setup_nginx
   script += setup_images
+  script += serve
   web.vm.provision :shell, :inline => script
 
 
@@ -65,6 +84,10 @@ SCRIPT
   config.vm.define "backup" do |backup|
     backup.vm.box = "brownell/xenial64lemp"
     backup.vm.network :private_network, ip: "10.0.0.11"
+    script = ''
+  
+    script += update
+    backup.vm.provision :shell, :inline => script
   end
 
 

@@ -60,7 +60,7 @@ const Navbar = props => {
     setSearch(event.target.value);
   };
   const handleSearch = () => {
-    axios.get(url + search).then(res => {
+    axios.get("http://10.0.0.10/?resources=products&action=search&name=" + search).then(res => {
       let data = res.data;
       console.log(data);
       setSearchList(data);
