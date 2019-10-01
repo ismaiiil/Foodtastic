@@ -10,9 +10,12 @@ import Tooltip from "@material-ui/core/Tooltip";
 
 import { useStyles } from "./navStyle";
 import { Link } from "react-router-dom";
+import { useStoreState } from "easy-peasy";
 
 const MainListItems = () => {
   // const classes = useStyles();
+  const cartItems = useStoreState(state => state.cart.cartItems);
+  const isLogged = useStoreState(state => state.user.isLogged);
 
   return (
     <div>
@@ -26,14 +29,9 @@ const MainListItems = () => {
       </Tooltip>
 
       <Tooltip title="Your cart" placement="right-start">
-        <ListItem button>
+        <ListItem button component={Link} to="/cart">
           <ListItemIcon>
-            <Badge
-              color="secondary"
-              badgeContent={4}
-              component={Link}
-              to="/cart"
-            >
+            <Badge color="secondary" badgeContent={cartItems.length}>
               <ShoppingCartIcon />
             </Badge>
           </ListItemIcon>
@@ -41,14 +39,16 @@ const MainListItems = () => {
         </ListItem>
       </Tooltip>
 
-      <Tooltip title="Your profile" placement="right-start">
-        <ListItem button>
-          <ListItemIcon>
-            <AccountCircle />
-          </ListItemIcon>
-          <ListItemText primary="Your Profile" />
-        </ListItem>
-      </Tooltip>
+      {isLogged ? (
+        <Tooltip title="Your profile" placement="right-start">
+          <ListItem button component={Link} to="/profile">
+            <ListItemIcon>
+              <AccountCircle />
+            </ListItemIcon>
+            <ListItemText primary="Your Profile" />
+          </ListItem>
+        </Tooltip>
+      ) : null}
     </div>
   );
 };

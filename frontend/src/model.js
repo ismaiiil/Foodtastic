@@ -30,7 +30,7 @@ export default {
     signOutRes: thunk(async (actions, url) => {
       const res = await fetch(url);
       const data = await res.json();
-      if (data.error.code === "200") {
+      if (data.error.code === 200) {
         actions.setSignedOut(true);
       } else {
         actions.setSignedOut(false);
@@ -39,6 +39,22 @@ export default {
     signedOut: null,
     setSignedOut: action((state, bool) => {
       state.signedOut = bool;
+    }),
+    searchList: [],
+    setSearchList: action((state, list) => {
+      state.searchList = list;
+    })
+  },
+  cart: {
+    cartItems: [],
+    setCartItems: action((state, item) => {
+      state.cartItems.push(item);
+    }),
+    emptyCartItems: action(state => {
+      state.cartItems = [];
+    }),
+    removeCartItemAtIndex: action((state, index) => {
+      state.cartItems.splice(index, 1);
     })
   }
 };
