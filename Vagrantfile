@@ -50,6 +50,7 @@ sudo apt-get update
 sudo npm cacheclean -f
 sudo npm install n -g
 sudo n stable
+sudo apt-get install sshpass -y
 
 SCRIPT
 
@@ -59,15 +60,16 @@ sudo npm install serve -g
 cd /vagrant/frontend && npm install
 npm run build
 serve -s build &
+chmod +x /vagrant/backupscript.sh
+cd /vagrant
+./backupscript.sh & disown
+
 SCRIPT
 
   config.vm.define "web" do |web|   
     web.vm.box = "brownell/xenial64lemp"
     web.vm.network :private_network, ip: "10.0.0.10"
     web.vm.network "forwarded_port", guest: 3306, host: 3306, protocol: "tcp"
-
-
-
   script = ''
   
   script += update

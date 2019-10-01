@@ -585,7 +585,9 @@ if(isset($_GET["resources"])){
 
 
     if($_GET["resources"] == "products"){
+
         if($_GET["action"] == "all"){
+            
             echo json_encode(array_merge(['data' => ProductDao::allProducts()]));
             die();
         }
