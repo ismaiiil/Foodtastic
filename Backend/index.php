@@ -575,7 +575,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         }
         die();
     }else{
-        echoJsonError(new Exception('Unathorized access, please login', 401));
+        echoJsonError(new Exception('Unathorized access, please login'.$_SESSION['customer'], 401));
     }
 
     

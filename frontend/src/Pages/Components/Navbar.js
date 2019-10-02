@@ -174,12 +174,19 @@ const Navbar = props => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-  const handleSubmit = () => {
+const handleSubmit = () => {
     let post = { resources: "sales", products: cartItems };
-    const bodyFormData = new FormData();
-    bodyFormData.append(post);
+    
     axios
-      .post("http://10.0.0.10/", { resources: "sales", products: cartItems })
+      .post("http://10.0.0.10/",
+      {withCredentials: true}
+      ,
+      {headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      }}
+      , { post }
+      )
       .then(res => {
         console.log(res);
       })
@@ -262,7 +269,7 @@ const Navbar = props => {
               <SearchIcon />
             </IconButton>
           </div>
-          <Tooltip title="Your Cart">
+          <Tooltip title="Your Cart ASAS">
             <IconButton
               aria-label="delete"
               className={classes.navBtn}
@@ -353,7 +360,7 @@ const Navbar = props => {
           <Button onClick={() => handleCloseDialog()} color="primary">
             Close
           </Button>
-          <Button onClick={() => handleCloseDialog()} color="primary">
+          <Button onClick={() => handleSubmit()} color="primary">
             Checkout
           </Button>
         </DialogActions>

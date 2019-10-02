@@ -44,7 +44,7 @@ server {
 		# First attempt to serve request as file, then
 		# as directory, then fall back to displaying a 404.
 		if ($request_method = 'OPTIONS') {
-        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Origin' 'http://10.0.0.10:3000';
         #
         # Om nom nom cookies
         #
@@ -63,16 +63,16 @@ server {
         return 204;
 		}
 		if ($request_method = 'POST') {
-			add_header 'Access-Control-Allow-Origin' '*';
-			add_header 'Access-Control-Allow-Credentials' 'true';
-			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+			add_header 'Access-Control-Allow-Origin' 'http://10.0.0.10:3000' ;
+			add_header 'Access-Control-Allow-Credentials' 'true' ;
+			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' ;
+			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' ;
 		}
 		if ($request_method = 'GET') {
-			add_header 'Access-Control-Allow-Origin' '*';
-			add_header 'Access-Control-Allow-Credentials' 'true';
-			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+			add_header 'Access-Control-Allow-Origin' 'http://10.0.0.10:3000' ;
+			add_header 'Access-Control-Allow-Credentials' 'true' ;
+			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' ;
+			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' ;
 		}
 		try_files $uri $uri/ =404;
 	}
@@ -81,16 +81,16 @@ server {
 	location ~ \.php$ {
 		include snippets/fastcgi-php.conf;
 		if ($request_method = 'OPTIONS') {
-        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Origin' 'http://10.0.0.10:3000';
         #
         # Om nom nom cookies
         #
-        add_header 'Access-Control-Allow-Credentials' 'true';
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Credentials' 'true' ;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS ';
         #
         # Custom headers and headers various browsers *should* be OK with but aren't
         #
-        add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+        add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' ;
         #
         # Tell client that this pre-flight info is valid for 20 days
         #
@@ -100,16 +100,16 @@ server {
         return 204;
 		}
 		if ($request_method = 'POST') {
-			add_header 'Access-Control-Allow-Origin' '*';
-			add_header 'Access-Control-Allow-Credentials' 'true';
-			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+			add_header 'Access-Control-Allow-Origin' 'http://10.0.0.10:3000' ;
+			add_header 'Access-Control-Allow-Credentials' 'true' ;
+			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' ;
+			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' ;
 		}
 		if ($request_method = 'GET') {
-			add_header 'Access-Control-Allow-Origin' '*';
-			add_header 'Access-Control-Allow-Credentials' 'true';
-			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+			add_header 'Access-Control-Allow-Origin' 'http://10.0.0.10:3000' ;
+			add_header 'Access-Control-Allow-Credentials' 'true' ;
+			add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' ;
+			add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' ;
 		}
 	#	# With php7.0-cgi alone:
 	#	fastcgi_pass 127.0.0.1:9000;

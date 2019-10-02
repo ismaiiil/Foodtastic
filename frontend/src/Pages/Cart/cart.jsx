@@ -48,9 +48,11 @@ const Cart = props => {
       )
       .then(res => {
         console.log(res);
+        console.log(post);
       })
       .catch(err => {
         console.log(err);
+        console.log(post);
       });
   };
 

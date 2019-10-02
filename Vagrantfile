@@ -50,7 +50,6 @@ sudo apt-get update
 sudo npm cacheclean -f
 sudo npm install n -g
 sudo n stable
-sudo apt-get install sshpass -y
 
 SCRIPT
 
@@ -59,10 +58,8 @@ cd /vagrant/frontend
 sudo npm install serve -g
 cd /vagrant/frontend && npm install
 npm run build
-serve -s build &
-chmod +x /vagrant/backupscript.sh
+serve -l 3000 -s build &
 cd /vagrant
-./backupscript.sh & disown
 
 SCRIPT
 
@@ -92,5 +89,26 @@ SCRIPT
     backup.vm.provision :shell, :inline => script
   end
 
+ config.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+ public_key = File.read("./id_rsa.pub")
+ config.vm.provision :shell, :inline =>"
+     echo 'Copying web public SSH Keys to the VM'
+     mkdir -p /home/vagrant/.ssh
+     chmod 700 /home/vagrant/.ssh
+     echo '#{public_key}' >> /home/vagrant/.ssh/authorized_keys
+     chmod -R 600 /home/vagrant/.ssh/authorized_keys
+     echo 'Host 10.0.*.*' >> /home/vagrant/.ssh/config
+     echo 'StrictHostKeyChecking no' >> /home/vagrant/.ssh/config
+     echo 'UserKnownHostsFile /dev/null' >> /home/vagrant/.ssh/config
+     chmod -R 600 /home/vagrant/.ssh/config
+     ", privileged: false
 
 end
+#scp -r -i ~/.ssh/id_rsa /vagrant/Backend/.receipts vagrant@10.0.0.11:/vagrant/backup
+#set up cron
+#make scripts exectubale and ad them to cron
+#ping else send mail
+#save the backups where?? save file backups
+#/backup/code_receipts
+#/backup/data
+
