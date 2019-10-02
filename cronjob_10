@@ -1,0 +1,5 @@
+0 */6 * * * /vagrant/backup_data.sh >> /vagrant/data_backup.log 2>&1
+0 0 * * * /vagrant/backup_code_and_receipts.sh >> /vagrant/code_receipts_backup.log 2>&1
+* * * * * /vagrant/check_connection_10.sh  >> /vagrant/check_connection_10.log 2>&1
+
+# Comment to make sure there is new line at the end of file

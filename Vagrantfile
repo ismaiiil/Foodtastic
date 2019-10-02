@@ -7,6 +7,11 @@
 # you're doing.
 Vagrant.configure("2") do |config|
 
+config.vm.provision "shell", inline: <<-SHELL
+  systemctl disable apt-daily.service
+  systemctl disable apt-daily.timer
+  chmod +x /vagrant/provision.sh
+SHELL
 
   setup_sql = <<'SCRIPT'
 #wait for myql to start up
@@ -43,10 +48,9 @@ sudo cp -a /vagrant/tobecopied/seedimages/. /vagrant/Backend/.images
 SCRIPT
 
 update = <<'SCRIPT'
-# update system before we install anything
-sudo systemctl disable apt-daily.service
-sudo systemctl disable apt-daily.timer
-sudo apt-get update
+systemctl disable apt-daily.service
+systemctl disable apt-daily.timer
+apt-get update
 sudo npm cacheclean -f
 sudo npm install n -g
 sudo n stable
@@ -63,6 +67,28 @@ cd /vagrant
 
 SCRIPT
 
+#note that by default cron jobs will be added to root user since
+#vagrant provision runs at an elevated right
+prepare_backup_10 = <<'SCRIPT'
+
+cd /vagrant
+chmod +x backup_code_and_receipts.sh
+chmod +x backup_data.sh
+chmod +x check_connection_10.sh
+crontab cronjob_10
+
+SCRIPT
+
+prepare_backup_11 = <<'SCRIPT'
+
+cd /vagrant
+chmod +x check_connection_11.sh
+mkdir -p /home/vagrant/backup/code_receipts
+mkdir -p /home/vagrant/backup/data
+crontab cronjob_11
+
+SCRIPT
+
   config.vm.define "web" do |web|   
     web.vm.box = "brownell/xenial64lemp"
     web.vm.network :private_network, ip: "10.0.0.10"
@@ -74,9 +100,8 @@ SCRIPT
   script += setup_nginx
   script += setup_images
   script += serve
+  script += prepare_backup_10
   web.vm.provision :shell, :inline => script
-
-
 
   end
 
@@ -84,13 +109,14 @@ SCRIPT
     backup.vm.box = "brownell/xenial64lemp"
     backup.vm.network :private_network, ip: "10.0.0.11"
     script = ''
-  
     script += update
+    script += prepare_backup_11
     backup.vm.provision :shell, :inline => script
   end
 
  config.vm.provision "file", source: "./id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
  public_key = File.read("./id_rsa.pub")
+
  config.vm.provision :shell, :inline =>"
      echo 'Copying web public SSH Keys to the VM'
      mkdir -p /home/vagrant/.ssh
@@ -102,13 +128,6 @@ SCRIPT
      echo 'UserKnownHostsFile /dev/null' >> /home/vagrant/.ssh/config
      chmod -R 600 /home/vagrant/.ssh/config
      ", privileged: false
-
+  
 end
-#scp -r -i ~/.ssh/id_rsa /vagrant/Backend/.receipts vagrant@10.0.0.11:/vagrant/backup
-#set up cron
-#make scripts exectubale and ad them to cron
-#ping else send mail
-#save the backups where?? save file backups
-#/backup/code_receipts
-#/backup/data
 
