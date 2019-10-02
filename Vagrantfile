@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 config.vm.provision "shell", inline: <<-SHELL
   systemctl disable apt-daily.service
   systemctl disable apt-daily.timer
-  chmod +x /vagrant/provision.sh
+  chmod +x /vagrant/setup_mail.sh
 SHELL
 
   setup_sql = <<'SCRIPT'
@@ -62,7 +62,6 @@ cd /vagrant/frontend
 sudo npm install serve -g
 cd /vagrant/frontend && npm install
 npm run build
-serve -l 3000 -s build &
 cd /vagrant
 
 SCRIPT
