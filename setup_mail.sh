@@ -10,7 +10,8 @@ cp /vagrant/tobecopied/main.cf /etc/postfix/main.cf
 mkdir -p /etc/postfix/
 sudo rm /etc/postfix/sasl_passwd
 cp /vagrant/tobecopied/sasl_passwd /etc/postfix/sasl_passwd
-sudo postmap /etc/postfix/sasl_passwd
+sudo chmod 400 /etc/postfix/sasl_passwd
+sudo postmap /etc/postfix/sasl_passwd 
 cat /etc/ssl/certs/thawte_Primary_Root_CA.pem | sudo tee -a /etc/postfix/cacert.pem
 sudo /etc/init.d/postfix reload
 
